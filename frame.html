@@ -25,7 +25,6 @@
       border-radius: 0; /* убираем скругления для строгого вида */
       border: 3px solid #b4b272;
       padding: 2%;
-      Padding-top: 0;
       width: 95vw; /* ширина почти на весь экран */
       height: 95vh; /* высота почти на весь экран */
       box-sizing: border-box;
@@ -137,6 +136,9 @@
   }
 }
 
+.hidden-content {
+  visibility: hidden;
+}
 
 
 
@@ -146,16 +148,14 @@
 <body>
   <div class="container">
     
-    <div class="tabs">
-      <div id='1' class="sort tab active">Сортировка</div>  <!-- сортировка + ближняя загрузка(1 место) --> 
-      <div id='2' class="load tab">Загрузка</div>   <!-- Данный маршрут имеет высокий приоритет, так как он имеет прямое воздействие на стан --> 
-      <div id='3' class="unload tab">Выгрузка</div> <!-- Выгрузка с обеих стоп + из склада(6 мест) ( в виде пикто грам) --> 
-      <div id='4' class="load_far tab">Загрузка дальняя</div> <!-- там 3 позиции) -->
-    </div>
+    <!-- <div class="tabs">
+      <div id='1' class="map tab active">Карта</div>  <!-- сортировка + ближняя загрузка(1 место) 
+      <div id='2' class="history tab">История</div>   <!-- Данный маршрут имеет высокий приоритет, так как он имеет прямое воздействие на стан 
+    </div> -->
 
     <div class="grid"> <!-- Вот это надо отрисовывать-->
       
-        <svg id="svg" viewBox="0 0 100 100" preserveAspectRatio="xMinYMin meet" style="width: 100%; height: 100%;">
+        <svg id="svg" viewBox="0 0 150 150" preserveAspectRatio="xMinYMin meet" style="width: 100%; height: 100%;">
            <!-- Динамически выполняется -->
         </svg>
   
@@ -164,14 +164,12 @@
     </div>
 
 
-      <div class="form-container">
+      <div class="form-container hidden-content">
       <form id="Form" class="bottom-fixed-form">
         <select title="Откуда" class="from form-item">
-          <option value="">Откуда</option>
         </select>
 
         <select title="Куда" class="to form-item">
-          <option value="">Куда</option>
         </select>
 
         <input class="count form-item" type="text" placeholder="количество">
@@ -191,9 +189,7 @@
               e.preventDefault(); //TODO Переопределить поведение формы
           
        });
-        function deactivate(){
-          document.querySelector(".active").classList.remove("active");
-        };
+        
 
         function clean_select(slct){
             while (slct.options.length > 1) {
@@ -202,131 +198,110 @@
             }
         };
 
-        function share_action(tab){
-                    deactivate();
-                    tab.classList.add("active");
-                    const selectFrom = document.querySelector('.from');
-                    clean_select(selectFrom);
-                    const selectTo = document.querySelector('.to');
-                    clean_select(selectTo);
-        };
         init_val = null;
         const svg = document.getElementById('svg');
-        document.querySelectorAll('.tab').forEach(tab => {
-            switch (tab.classList[0]){
-                case "sort":
+        const pointer = {
+          'from': null,
+          'to': null,
+        }
+        
 
+
+
+        const rectsData = [
                   
-                  const rectsData = [
-                  // Первая строка (3 прямоугольника)
-                  { id: 'pos0', x: 0,   y: 0 },
-                  { id: 'pos1', x: 42,  y: 0 },
-                  { id: 'pos2', x: 84,  y: 0 },
-                  { id: 'pos3', x: 0,   y: 22 },
-                  { id: 'pos4', x: 42,  y: 22 },
-                  { id: 'pos5', x: 84,  y: 22 },
-                  { id: 'pos6', x: 126, y: 22 }];
+                  { id: 'pos0', x: 0,   y: 0,  width: 40, height: 20},
+                  { id: 'pos1', x: 42,  y: 0,  width: 40, height: 20} ,
+                  { id: 'pos2', x: 84,  y: 0,  width: 40, height: 20 },
+                  { id: 'pos3', x: 0,   y: 22,  width: 40, height: 20 },
+                  { id: 'pos4', x: 42,  y: 22,  width: 40, height: 20 },
+                  { id: 'pos5', x: 84,  y: 22,  width: 40, height: 20 },
+                  { id: 'pos6', x: 126, y: 22,  width: 40, height: 20 }
+                ];
+        rectsData.forEach((rectData, index) => {
 
+                                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                                
+                                rect.setAttribute('x', rectData.x);
+                                rect.setAttribute('y', rectData.y);
+                                rect.setAttribute('width', rectData.width);
+                                rect.setAttribute('height', rectData.height);
+                                rect.setAttribute('fill', 'white');
+                                rect.setAttribute('stroke', '#b6b171');
+                                rect.setAttribute('stroke-width', 0.5);
+                                rect.setAttribute('rx', 2);
+                                rect.setAttribute('ry', 2);
+                                rect.setAttribute('id', rectData.id);
+                                
+                                
+                                svg.appendChild(rect);
 
-                  if (!init_val){
-                    rectsData.forEach((rectData, index) => {
-                              const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                                rect.addEventListener('click', (e) => {
+                                    
 
-                              
-                              rect.setAttribute('x', rectData.x);
-                              rect.setAttribute('y', rectData.y);
-                              rect.setAttribute('width', 40);
-                              rect.setAttribute('height', 20);
-                              rect.setAttribute('fill', 'white');
-                              rect.setAttribute('stroke', '#b6b171');
-                              rect.setAttribute('stroke-width', 0.5);
-                              rect.setAttribute('rx', 2);
-                              rect.setAttribute('ry', 2);
-                              rect.setAttribute('id', rectData.id);
-                              
+                                    if (pointer.from == rect.id){
+                                      // очистка выбранной позиции
+                                      pointer.from = null;
+                                      rect.setAttribute("fill", "white");
+                                      return;
+                                    }
+                                    else if (pointer.to == rect.id){
+                                      pointer.to = pointer.from;
+                                      pointer.from = rect.id;
+                                      if (pointer.to){
+                                        const p_to = document.getElementById(pointer.to);
+                                        p_to.setAttribute("fill", "red");
+                                      }
+                                    }
+                                    else if (pointer.from && pointer.from != rect.id){
+                                      const p_from = document.getElementById(pointer.from);
+                                      p_from.setAttribute("fill", "white");
+                                      pointer.from = null;
+                                    }
+                                    pointer.from = rect.id;
+                                    rect.setAttribute("fill", "green");
 
-                              // Добавляем в SVG
-                              svg.appendChild(rect);
-                    });
-                    const posFirst = document.getElementById('pos0');
-                    posFirst.addEventListener('click', (e) => {
-                      posFirst.setAttribute("fill", "green");
-                    });
+                                    if (pointer.from && pointer.to){
+                                      IsBuildRoute();
+                                    }
+                                    //TODO проверка на то, что выбраны 2 позиции
+                                  }
+                                );
 
-                    const posSecond = document.getElementById('pos6');
-                    posSecond.addEventListener('contextmenu', (e) => {
-                        e.preventDefault();
-                        posSecond.setAttribute("fill", "red");
-                    }); 
-                    init_val = true;
-                  }
-                  tab.addEventListener('click', () => {
-                    share_action(tab);
-                    svg.innerHTML = "";
-                    rectsData.forEach((rectData, index) => {
-                              const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                                rect.addEventListener('contextmenu', (e) => {
+                                    e.preventDefault();
+                                    if (pointer.to == rect.id){
+                                      // очистка выбранной позиции
+                                      pointer.to = null;
+                                      rect.setAttribute("fill", "white");
+                                      return;
+                                    }
+                                    else if (pointer.from == rect.id){
+                                      pointer.from = pointer.to;
+                                      pointer.to = rect.id;
+                                      if (pointer.from){
+                                        const p_from = document.getElementById(pointer.from);
+                                        p_from.setAttribute("fill", "green");
+                                      }
+                                    }
+                                    else if (pointer.to && pointer.to != rect.id){
+                                      const p_to = document.getElementById(pointer.to);
+                                      p_to.setAttribute("fill", "white");
+                                      pointer.to = null;
+                                    }
+                                    pointer.to = rect.id;
+                                    rect.setAttribute("fill", "red");
+                                    if (pointer.from && pointer.to){
+                                      IsBuildRoute();
+                                    }
+                                }); 
 
-                              
-                              rect.setAttribute('x', rectData.x);
-                              rect.setAttribute('y', rectData.y);
-                              rect.setAttribute('width', 40);
-                              rect.setAttribute('height', 20);
-                              rect.setAttribute('fill', 'white');
-                              rect.setAttribute('stroke', '#b6b171');
-                              rect.setAttribute('stroke-width', 0.5);
-                              rect.setAttribute('rx', 2);
-                              rect.setAttribute('ry', 2);
-                              rect.setAttribute('id', rectData.id);
-                              
-
-                              // Добавляем в SVG
-                              svg.appendChild(rect);
-
-
-                              
-                    });
-                    const posFirst = document.getElementById('pos0');
-                              posFirst.addEventListener('click', (e) => {
-                                posFirst.setAttribute("fill", "green");
-                              });
-
-                    const posSecond = document.getElementById('pos6');
-                              posSecond.addEventListener('contextmenu', (e) => {
-                                  e.preventDefault();
-                                  posSecond.setAttribute("fill", "red");
-                          }); 
-                    
-
-
-                    // Типа отрисовка svg сначала drawMap();
-                    //todo нужно глобально отслеживать что выбрано пкм/лкм и отключать выделение при двойном нажатии по выделенному объекту
-                    
-
-                  });
-                  break;
-                case "load":
-                    tab.addEventListener('click', () => {
-                      share_action(tab);
-                      svg.innerHTML = "";
-                    });
-                 break;
-                case "unload":
-                    tab.addEventListener('click', () => {
-                      share_action(tab);
-                      svg.innerHTML = "";
-                    });
-                  break;
-
-                case "load_far":
-                  tab.addEventListener('click', () => {
-                        share_action(tab);
-                        svg.innerHTML = "";
                       });
-                  break;
+        function IsBuildRoute(){
 
-            }
+        }
 
-        }); 
+      
 
 
         
