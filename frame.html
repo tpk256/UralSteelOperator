@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UI Layout Fullscreen</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      background-color: #d3d09e;
+      border-radius: 0; /* убираем скругления для строгого вида */
+      border: 3px solid #b4b272;
+      padding: 2%;
+      Padding-top: 0;
+      width: 95vw; /* ширина почти на весь экран */
+      height: 95vh; /* высота почти на весь экран */
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border-radius: 1%;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 1%;
+      margin-bottom: 2%;
+    }
+
+    .tab {
+      flex: 1;
+      min-width: 9vw; /* адаптивная ширина в зависимости от ширины окна */
+      text-align: center;
+      padding: 1.5vh 0; /* отступы в зависимости от высоты окна */
+      background-color: #f7f5cf;
+      border: 2px solid #b4b272;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      border-bottom: none;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s;
+      clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);
+      font-size: 1.1vw; /* текст тоже адаптивный */
+    }
+
+    .tab.active {
+      background-color: #fff;
+      font-weight: bold;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(20%, 1fr));
+      gap: 2%;
+      flex: 1; /* чтобы растягивалось на всё доступное место */
+      overflow-y: auto;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 0;
+      height: 20vh; /* адаптивная высота */
+      border: 3px solid #b4b272;
+      box-sizing: border-box;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: scale(1.03); /* небольшой zoom при наведении */
+    }
+
+
+    @media (max-width: 768px) {
+      .tab {
+        min-width: 16vw;
+        font-size: 1.7vw;
+        padding: 1vh 0;
+      }
+
+      .card {
+        height: 15vh;
+      }
+    }
+
+    .bottom-fixed-form {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background-color: #d8d3a4; /* Цвет формы */
+  box-sizing: border-box;
+  border-top: 1px solid #ccc;
+}
+
+.bottom-fixed-form select,
+.bottom-fixed-form input {
+  flex: 1 1 100px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.bottom-fixed-form button {
+  flex: 1 1 150px;
+  padding: 10px;
+  background-color: #b6b171;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .bottom-fixed-form {
+    flex-direction: column;
+  }
+
+  .bottom-fixed-form button {
+    width: 100%;
+  }
+}
+
+
+
+
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <div class="tabs">
+      <div id='1' class="sort tab active">Сортировка</div>  <!-- Сделать как кнопку и привязку к функции инициализации и глобал стейт -->
+      <div id='2' class="load tab">Загрузка дальняя</div>
+      <div id='3' class="unload tab">Выгрузка дальняя</div>
+      <div id='4' class="### tab">Загрузка дальняя</div>
+      <div id='5' class="### tab">Загрузка дальняя</div>
+    </div>
+
+    <div class="grid">
+
+    </div>
+
+
+      <div class="form-container">
+      <form id="Form" class="bottom-fixed-form">
+        <select title="Откуда" class="from form-item">
+          <option value="">Откуда</option>
+        </select>
+
+        <select title="Куда" class="to form-item">
+          <option value="">Куда</option>
+        </select>
+
+        <input class="count form-item" type="text" placeholder="количество">
+      
+        <button class="create_task submit-btn" type="submit">Создать задание</button>
+      </form>
+      </div>
+
+    
+    
+    
+
+  </div>
+    <script>
+
+       document.getElementById('Form').addEventListener('submit', function(e) {
+              e.preventDefault(); //TODO Переопределить поведение формы
+          
+       });
+        function deactivate(){
+          document.querySelector(".active").classList.remove("active");
+        };
+
+        function clean_select(slct){
+            while (slct.options.length > 1) {
+                slct.remove(1);
+                      
+            }
+        };
+
+        function share_action(tab){
+                    deactivate();
+                    tab.classList.add("active");
+                    const selectFrom = document.querySelector('.from');
+                    clean_select(selectFrom);
+                    const selectTo = document.querySelector('.to');
+                    clean_select(selectTo);
+        };
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            switch (tab.classList[0]){
+                case "sort":
+                  tab.addEventListener('click', () => {
+                    share_action(tab);
+
+                  });
+                  break;
+                case "load":
+                    tab.addEventListener('click', () => {
+                      share_action(tab);
+                    });
+                 break;
+                case "unload":
+                    tab.addEventListener('click', () => {
+                      share_action(tab);
+                    });
+                  break;
+
+            }
+
+        }); 
+
+
+        
+    </script>
+</body>
+</html>
