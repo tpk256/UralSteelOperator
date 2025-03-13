@@ -147,11 +147,10 @@
   <div class="container">
     
     <div class="tabs">
-      <div id='1' class="sort tab active">Сортировка</div>  <!-- Сделать как кнопку и привязку к функции инициализации и глобал стейт -->
-      <div id='2' class="load tab">Загрузка дальняя</div>
-      <div id='3' class="unload tab">Выгрузка дальняя</div>
-      <div id='4' class="### tab">Загрузка дальняя</div>
-      <div id='5' class="### tab">Загрузка дальняя</div>
+      <div id='1' class="sort tab active">Сортировка</div>  <!-- сортировка + ближняя загрузка(1 место) --> 
+      <div id='2' class="load tab">Загрузка</div>   <!-- Данный маршрут имеет высокий приоритет, так как он имеет прямое воздействие на стан --> 
+      <div id='3' class="unload tab">Выгрузка</div> <!-- Выгрузка с обеих стоп + из склада(6 мест) ( в виде пикто грам) --> 
+      <div id='4' class="load_far tab">Загрузка дальняя</div> <!-- там 3 позиции) -->
     </div>
 
     <div class="grid">
@@ -223,6 +222,12 @@
                     tab.addEventListener('click', () => {
                       share_action(tab);
                     });
+                  break;
+
+                case "load_far":
+                  tab.addEventListener('click', () => {
+                        share_action(tab);
+                      });
                   break;
 
             }
