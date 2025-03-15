@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UI Layout Fullscreen</title>
+  <script src="init.js"></script>
+  <title>Fullscreen</title>
+
   <style>
     html, body {
       margin: 0;
@@ -84,19 +86,55 @@ text {
   transition: background-color 0.3s ease;
 }
 
+.tasks {
+  position: absolute;
+  width: 30vw;
+  height: 40vw;
+  stroke: black;
+  font-size: 1vw;
+  pointer-events: none;
+ 
+}
+.tasks table{
+  pointer-events: auto;
+  border-collapse: collapse; 
+  border: 2px solid #333; 
+}
+.tasks th, td {
+  border: 1px solid #333;
+  text-align: left;
+  padding: 0.3em;
+}
 
 
 
   </style>
 </head>
 <body>
+
+  
+
   <div class="container">
     <div class="grid">
-      
+      </div>
         <svg id="svg" viewBox="0 0 265 100" preserveAspectRatio="xMinYMin meet" style="width: 100%; height: 100%;">
            <!-- Динамически выполняется -->
         </svg>
-  
+        <div class="tasks">
+          <table>
+            <thead>
+              <tr>
+                <th>№</th><th>Откуда</th><th>Куда</th><th>Количество</th><th>Приоритет</th><th>редактировать</th><th>удалить</th>
+              </tr>
+            </thead>
+            <tbody class="Priority">
+              <tr id="1"></tr>
+              <tr id="2"></tr>
+              <tr id="3"></tr>
+              <tr id="4"></tr>
+              <tr id="5"></tr>
+            </tbody>
+          </table>
 
 
     </div>
@@ -111,15 +149,8 @@ text {
       </form>
       </div>
 
-    
-    
-    
-
   </div>
     <script>
-
-       
-
 
         const svg = document.getElementById('svg');
         const pointer = {
@@ -127,20 +158,7 @@ text {
           'to': null,
         }
         
-        function dRoute() {
-            const form = document.querySelector("#Form");
-            form.style.visibility = 'hidden';
-        }
-        function IsBuildRoute(){
-            //Делаем видимым
-            const form = document.querySelector("#Form");
-            form.style.visibility = 'visible';
-
-            const inputCount = document.querySelector('.count');
-            inputCount.value = "1";
-            //todo добавить ограничения
-            inputCount.setAttribute("value", "1");
-        }
+       
         
         const rectsData = [
                   
@@ -153,9 +171,6 @@ text {
                   { id: 5, x: 174,  y: 15,  width: 20, height: 40, name: "#5" },
                   { id: 6, x: 174,  y: 60,  width: 20, height: 40, name: "#6" },
 
-
-
-
                   { id: 7, x: 0, y: 80,  width: 30, height: 20, name: "f-load#1" },
                   { id: 8, x: 35, y: 80,  width: 30, height: 20, name: "f-load#2" },
                   { id: 9, x: 70, y: 80,  width: 30, height: 20, name: "f-load#3" },
@@ -165,155 +180,11 @@ text {
 
                   { id: 12, x: 200, y: 68,  width: 30, height: 10, color: "gray", name: "out" },
                   { id: 13, x: 235, y: 68,  width: 30, height: 10, color: "gray", name: "in"},
-
                 ];
 
-        const grayZone = [12, 13]; 
-        document.getElementById('Form').addEventListener('submit', function(e) {
-              e.preventDefault(); //TODO Переопределить поведение формы
-              const form = e.target;
-
-              const BaseTask = {
-                "from": pointer.from,
-                "to": pointer.to,
-                "count": form["count"].value
-              }
-              console.log("Вот что отправится");
-              console.log(BaseTask);
-              // отправка 
-
-              dRoute();
-              Reset(rectsData, grayZone);
-              pointer.from = null;
-              pointer.to = null;
-          
-       });
-        
-      function Reset(rectsData, grayZone){
-                    svg.innerHTML = "";
-                    rectsData.forEach((rectData, index) => {
-
-                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-
-                    rect.setAttribute('x', rectData.x);
-                    rect.setAttribute('y', rectData.y);
-                    rect.setAttribute('width', rectData.width);
-                    rect.setAttribute('height', rectData.height);
-                    rect.setAttribute('fill', 'white');
-                    rect.setAttribute('stroke', '#b6b171');
-                    rect.setAttribute('stroke-width', 0.5);
-                    rect.setAttribute('rx', 2);
-                    rect.setAttribute('ry', 2);
-                    rect.setAttribute('id', rectData.id);
-
-                    if (rectData.color){
-                      rect.setAttribute('stroke', '#838383');
-                      rect.setAttribute('fill', rectData.color);
-                    }
-
-
-                    svg.appendChild(rect);
-
-
-                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-
-                    const centerX = rectData.x + rectData.width / 2;
-                    const centerY = rectData.y + rectData.height / 2;
-
-                    text.setAttribute('x', centerX);
-                    text.setAttribute('y', centerY);
-                    text.setAttribute('text-anchor', 'middle');             // Центрировать по горизонтали
-                    text.setAttribute('alignment-baseline', 'middle');      // Центрировать по вертикали
-                    text.setAttribute('font-size', '6');                    // Размер шрифта, можешь поиграть
-                    text.setAttribute('fill', '#333');                      // Цвет шрифта
-                    text.textContent = `${rectData.name}`;                 // Текст в прямоугольнике
-
-                    svg.appendChild(text);
-
-
-                    rect.addEventListener('click', (e) => {
-                        
-
-                        if (pointer.from == rect.id){
-                          // очистка выбранной позиции
-                          pointer.from = null;
-                          if (grayZone.includes(Number(rect.id))){
-                            rect.setAttribute("fill", "gray");
-                            dRoute();
-                            return;
-                          }
-                          dRoute();
-                          rect.setAttribute("fill", "white");
-                          return;
-                        }
-                        else if (pointer.to == rect.id){
-                          pointer.to = pointer.from;
-                          pointer.from = rect.id;
-                          if (pointer.to){
-                            const p_to = document.getElementById(pointer.to);
-                            p_to.setAttribute("fill", "red");
-                          }
-                        }
-                        else if (pointer.from && pointer.from != rect.id){
-                          const p_from = document.getElementById(pointer.from);
-                          
-                          if ( grayZone.includes(Number(p_from.id)))
-                            p_from.setAttribute("fill", "gray");                                                                
-                          else
-                            p_from.setAttribute("fill", "white");
-                          pointer.from = null;
-                        }
-                        pointer.from = rect.id;
-                        rect.setAttribute("fill", "green");
-
-                        if (pointer.from && pointer.to){
-                          IsBuildRoute();
-                        }
-                        //TODO проверка на то, что выбраны 2 позиции
-                      }
-                    );
-
-                    rect.addEventListener('contextmenu', (e) => {
-                        e.preventDefault();
-                        if (pointer.to == rect.id){
-                          // очистка выбранной позиции
-                          pointer.to = null;
-                          if (grayZone.includes(Number(rect.id))){
-                            rect.setAttribute("fill", "gray");
-                            dRoute();
-                            return;
-                          }
-                          rect.setAttribute("fill", "white");
-                          dRoute();
-                          return;
-                        }
-                        else if (pointer.from == rect.id){
-                          pointer.from = pointer.to;
-                          pointer.to = rect.id;
-                          if (pointer.from){
-                            const p_from = document.getElementById(pointer.from);
-                            p_from.setAttribute("fill", "green");
-                          }
-                        }
-                        else if (pointer.to && pointer.to != rect.id){
-                          const p_to = document.getElementById(pointer.to);
-                          if (grayZone.includes(Number(p_to.id)))
-                            p_to.setAttribute("fill", "gray");
-                          else
-                            p_to.setAttribute("fill", "white");
-                          pointer.to = null;
-                        }
-                        pointer.to = rect.id;
-                        rect.setAttribute("fill", "red");
-                        if (pointer.from && pointer.to){
-                          IsBuildRoute();
-                        }
-                    }); 
-
-                    });
-
-        }
-        Reset(rectsData, grayZone)
+        const grayZone = [12, 13];
+      
+        InitPage(rectsData, grayZone);
         
     </script>
 </body>
