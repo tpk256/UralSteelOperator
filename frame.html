@@ -34,33 +34,6 @@
       border-radius: 1%;
     }
 
-    .tabs {
-      display: flex;
-      gap: 1%;
-      margin-bottom: 2%;
-    }
-
-    .tab {
-      flex: 1;
-      min-width: 9vw; /* адаптивная ширина в зависимости от ширины окна */
-      text-align: center;
-      padding: 1.5vh 0; /* отступы в зависимости от высоты окна */
-      background-color: #f7f5cf;
-      border: 2px solid #b4b272;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      border-bottom: none;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.3s;
-      clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);
-      font-size: 1.1vw; /* текст тоже адаптивный */
-    }
-
-    .tab.active {
-      background-color: #fff;
-      font-weight: bold;
-    }
-
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(20%, 1fr));
@@ -69,75 +42,46 @@
       overflow-y: auto;
     }
 
-    .card {
-      background-color: white;
-      border-radius: 0;
-      height: 20vh; /* адаптивная высота */
-      border: 3px solid #b4b272;
-      box-sizing: border-box;
-      transition: transform 0.2s;
-    }
-
-    .card:hover {
-      transform: scale(1.03); /* небольшой zoom при наведении */
-    }
 
 
-    @media (max-width: 768px) {
-      .tab {
-        min-width: 16vw;
-        font-size: 1.7vw;
-        padding: 1vh 0;
-      }
 
-      .card {
-        height: 15vh;
-      }
-    }
-
-    .bottom-fixed-form {
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  gap: 10px;
-  padding: 10px;
-  background-color: #d8d3a4; /* Цвет формы */
-  box-sizing: border-box;
-  border-top: 1px solid #ccc;
-}
-
-.bottom-fixed-form select,
-.bottom-fixed-form input {
-  flex: 1 1 100px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-}
-
-.bottom-fixed-form button {
-  flex: 1 1 150px;
-  padding: 10px;
-  background-color: #b6b171;
-  color: #fff;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-}
-
-@media (max-width: 600px) {
-  .bottom-fixed-form {
-    flex-direction: column;
-  }
-
-  .bottom-fixed-form button {
-    width: 100%;
-  }
+text {
+  pointer-events: none; 
 }
 
 .hidden-content {
+      /* форма закреплена внизу экрана */
   visibility: hidden;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #d8d3a4;
+  padding: 5px 5px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+  z-index: 1000;
+  
+}
+
+.bottom-fixed-form {
+  display: flex;
+  flex-wrap: wrap;          /* перенос на новую строку на узких экранах */
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end; /* Выравнивание по левому краю */
+}
+
+
+.bottom-fixed-form button {
+
+  padding: 5px;
+  background-color: #b6b171;
+  color: #fff;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
 }
 
 
@@ -147,15 +91,9 @@
 </head>
 <body>
   <div class="container">
-    
-    <!-- <div class="tabs">
-      <div id='1' class="map tab active">Карта</div>  <!-- сортировка + ближняя загрузка(1 место) 
-      <div id='2' class="history tab">История</div>   <!-- Данный маршрут имеет высокий приоритет, так как он имеет прямое воздействие на стан 
-    </div> -->
-
-    <div class="grid"> <!-- Вот это надо отрисовывать-->
+    <div class="grid">
       
-        <svg id="svg" viewBox="0 0 150 150" preserveAspectRatio="xMinYMin meet" style="width: 100%; height: 100%;">
+        <svg id="svg" viewBox="0 0 265 100" preserveAspectRatio="xMinYMin meet" style="width: 100%; height: 100%;">
            <!-- Динамически выполняется -->
         </svg>
   
@@ -164,15 +102,10 @@
     </div>
 
 
-      <div class="form-container hidden-content">
+      <div class="hidden-content">
       <form id="Form" class="bottom-fixed-form">
-        <select title="Откуда" class="from form-item">
-        </select>
-
-        <select title="Куда" class="to form-item">
-        </select>
-
-        <input class="count form-item" type="text" placeholder="количество">
+        <label for="cnt">Количество листов</label>
+        <input id="cnt" class="count" type="text" name="count" placeholder="количество">
       
         <button class="create_task submit-btn" type="submit">Создать задание</button>
       </form>
@@ -185,125 +118,202 @@
   </div>
     <script>
 
-       document.getElementById('Form').addEventListener('submit', function(e) {
-              e.preventDefault(); //TODO Переопределить поведение формы
-          
-       });
-        
+       
 
-        function clean_select(slct){
-            while (slct.options.length > 1) {
-                slct.remove(1);
-                      
-            }
-        };
 
-        init_val = null;
         const svg = document.getElementById('svg');
         const pointer = {
           'from': null,
           'to': null,
         }
         
+        function dRoute() {
+            const form = document.querySelector("#Form");
+            form.style.visibility = 'hidden';
+        }
+        function IsBuildRoute(){
+            //Делаем видимым
+            const form = document.querySelector("#Form");
+            form.style.visibility = 'visible';
 
-
-
+            const inputCount = document.querySelector('.count');
+            inputCount.value = "1";
+            //todo добавить ограничения
+            inputCount.setAttribute("value", "1");
+        }
+        
         const rectsData = [
                   
-                  { id: 'pos0', x: 0,   y: 0,  width: 40, height: 20},
-                  { id: 'pos1', x: 42,  y: 0,  width: 40, height: 20} ,
-                  { id: 'pos2', x: 84,  y: 0,  width: 40, height: 20 },
-                  { id: 'pos3', x: 0,   y: 22,  width: 40, height: 20 },
-                  { id: 'pos4', x: 42,  y: 22,  width: 40, height: 20 },
-                  { id: 'pos5', x: 84,  y: 22,  width: 40, height: 20 },
-                  { id: 'pos6', x: 126, y: 22,  width: 40, height: 20 }
+                  { id: 1, x: 130,   y: 15,  width: 20, height: 40, name: "#1"},
+                  { id: 2, x: 130,  y: 60,  width: 20, height: 40, name: "#2"} ,
+
+                  { id: 3, x: 152,  y: 15,  width: 20, height: 40, name: "#3" },
+                  { id: 4, x: 152,   y: 60,  width: 20, height: 40, name: "#4" },
+
+                  { id: 5, x: 174,  y: 15,  width: 20, height: 40, name: "#5" },
+                  { id: 6, x: 174,  y: 60,  width: 20, height: 40, name: "#6" },
+
+
+
+
+                  { id: 7, x: 0, y: 80,  width: 30, height: 20, name: "f-load#1" },
+                  { id: 8, x: 35, y: 80,  width: 30, height: 20, name: "f-load#2" },
+                  { id: 9, x: 70, y: 80,  width: 30, height: 20, name: "f-load#3" },
+
+                  { id: 10, x: 200, y: 80,  width: 30, height: 20, name: "n-load#1" },
+                  { id: 11, x: 235, y: 80,  width: 30, height: 20, name: "n-load#2" },
+
+                  { id: 12, x: 200, y: 68,  width: 30, height: 10, color: "gray", name: "out" },
+                  { id: 13, x: 235, y: 68,  width: 30, height: 10, color: "gray", name: "in"},
+
                 ];
-        rectsData.forEach((rectData, index) => {
 
-                                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                                
-                                rect.setAttribute('x', rectData.x);
-                                rect.setAttribute('y', rectData.y);
-                                rect.setAttribute('width', rectData.width);
-                                rect.setAttribute('height', rectData.height);
-                                rect.setAttribute('fill', 'white');
-                                rect.setAttribute('stroke', '#b6b171');
-                                rect.setAttribute('stroke-width', 0.5);
-                                rect.setAttribute('rx', 2);
-                                rect.setAttribute('ry', 2);
-                                rect.setAttribute('id', rectData.id);
-                                
-                                
-                                svg.appendChild(rect);
+        const grayZone = [12, 13]; 
+        document.getElementById('Form').addEventListener('submit', function(e) {
+              e.preventDefault(); //TODO Переопределить поведение формы
+              const form = e.target;
 
-                                rect.addEventListener('click', (e) => {
-                                    
+              const BaseTask = {
+                "from": pointer.from,
+                "to": pointer.to,
+                "count": form["count"].value
+              }
+              console.log("Вот что отправится");
+              console.log(BaseTask);
+              // отправка 
 
-                                    if (pointer.from == rect.id){
-                                      // очистка выбранной позиции
-                                      pointer.from = null;
-                                      rect.setAttribute("fill", "white");
-                                      return;
-                                    }
-                                    else if (pointer.to == rect.id){
-                                      pointer.to = pointer.from;
-                                      pointer.from = rect.id;
-                                      if (pointer.to){
-                                        const p_to = document.getElementById(pointer.to);
-                                        p_to.setAttribute("fill", "red");
-                                      }
-                                    }
-                                    else if (pointer.from && pointer.from != rect.id){
-                                      const p_from = document.getElementById(pointer.from);
-                                      p_from.setAttribute("fill", "white");
-                                      pointer.from = null;
-                                    }
-                                    pointer.from = rect.id;
-                                    rect.setAttribute("fill", "green");
+              dRoute();
+              Reset(rectsData, grayZone);
+              pointer.from = null;
+              pointer.to = null;
+          
+       });
+        
+      function Reset(rectsData, grayZone){
+                    svg.innerHTML = "";
+                    rectsData.forEach((rectData, index) => {
 
-                                    if (pointer.from && pointer.to){
-                                      IsBuildRoute();
-                                    }
-                                    //TODO проверка на то, что выбраны 2 позиции
-                                  }
-                                );
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 
-                                rect.addEventListener('contextmenu', (e) => {
-                                    e.preventDefault();
-                                    if (pointer.to == rect.id){
-                                      // очистка выбранной позиции
-                                      pointer.to = null;
-                                      rect.setAttribute("fill", "white");
-                                      return;
-                                    }
-                                    else if (pointer.from == rect.id){
-                                      pointer.from = pointer.to;
-                                      pointer.to = rect.id;
-                                      if (pointer.from){
-                                        const p_from = document.getElementById(pointer.from);
-                                        p_from.setAttribute("fill", "green");
-                                      }
-                                    }
-                                    else if (pointer.to && pointer.to != rect.id){
-                                      const p_to = document.getElementById(pointer.to);
-                                      p_to.setAttribute("fill", "white");
-                                      pointer.to = null;
-                                    }
-                                    pointer.to = rect.id;
-                                    rect.setAttribute("fill", "red");
-                                    if (pointer.from && pointer.to){
-                                      IsBuildRoute();
-                                    }
-                                }); 
+                    rect.setAttribute('x', rectData.x);
+                    rect.setAttribute('y', rectData.y);
+                    rect.setAttribute('width', rectData.width);
+                    rect.setAttribute('height', rectData.height);
+                    rect.setAttribute('fill', 'white');
+                    rect.setAttribute('stroke', '#b6b171');
+                    rect.setAttribute('stroke-width', 0.5);
+                    rect.setAttribute('rx', 2);
+                    rect.setAttribute('ry', 2);
+                    rect.setAttribute('id', rectData.id);
 
-                      });
-        function IsBuildRoute(){
+                    if (rectData.color){
+                      rect.setAttribute('stroke', '#838383');
+                      rect.setAttribute('fill', rectData.color);
+                    }
+
+
+                    svg.appendChild(rect);
+
+
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+
+                    const centerX = rectData.x + rectData.width / 2;
+                    const centerY = rectData.y + rectData.height / 2;
+
+                    text.setAttribute('x', centerX);
+                    text.setAttribute('y', centerY);
+                    text.setAttribute('text-anchor', 'middle');             // Центрировать по горизонтали
+                    text.setAttribute('alignment-baseline', 'middle');      // Центрировать по вертикали
+                    text.setAttribute('font-size', '6');                    // Размер шрифта, можешь поиграть
+                    text.setAttribute('fill', '#333');                      // Цвет шрифта
+                    text.textContent = `${rectData.name}`;                 // Текст в прямоугольнике
+
+                    svg.appendChild(text);
+
+
+                    rect.addEventListener('click', (e) => {
+                        
+
+                        if (pointer.from == rect.id){
+                          // очистка выбранной позиции
+                          pointer.from = null;
+                          if (grayZone.includes(Number(rect.id))){
+                            rect.setAttribute("fill", "gray");
+                            dRoute();
+                            return;
+                          }
+                          dRoute();
+                          rect.setAttribute("fill", "white");
+                          return;
+                        }
+                        else if (pointer.to == rect.id){
+                          pointer.to = pointer.from;
+                          pointer.from = rect.id;
+                          if (pointer.to){
+                            const p_to = document.getElementById(pointer.to);
+                            p_to.setAttribute("fill", "red");
+                          }
+                        }
+                        else if (pointer.from && pointer.from != rect.id){
+                          const p_from = document.getElementById(pointer.from);
+                          
+                          if ( grayZone.includes(Number(p_from.id)))
+                            p_from.setAttribute("fill", "gray");                                                                
+                          else
+                            p_from.setAttribute("fill", "white");
+                          pointer.from = null;
+                        }
+                        pointer.from = rect.id;
+                        rect.setAttribute("fill", "green");
+
+                        if (pointer.from && pointer.to){
+                          IsBuildRoute();
+                        }
+                        //TODO проверка на то, что выбраны 2 позиции
+                      }
+                    );
+
+                    rect.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        if (pointer.to == rect.id){
+                          // очистка выбранной позиции
+                          pointer.to = null;
+                          if (grayZone.includes(Number(rect.id))){
+                            rect.setAttribute("fill", "gray");
+                            dRoute();
+                            return;
+                          }
+                          rect.setAttribute("fill", "white");
+                          dRoute();
+                          return;
+                        }
+                        else if (pointer.from == rect.id){
+                          pointer.from = pointer.to;
+                          pointer.to = rect.id;
+                          if (pointer.from){
+                            const p_from = document.getElementById(pointer.from);
+                            p_from.setAttribute("fill", "green");
+                          }
+                        }
+                        else if (pointer.to && pointer.to != rect.id){
+                          const p_to = document.getElementById(pointer.to);
+                          if (grayZone.includes(Number(p_to.id)))
+                            p_to.setAttribute("fill", "gray");
+                          else
+                            p_to.setAttribute("fill", "white");
+                          pointer.to = null;
+                        }
+                        pointer.to = rect.id;
+                        rect.setAttribute("fill", "red");
+                        if (pointer.from && pointer.to){
+                          IsBuildRoute();
+                        }
+                    }); 
+
+                    });
 
         }
-
-      
-
-
+        Reset(rectsData, grayZone)
         
     </script>
 </body>

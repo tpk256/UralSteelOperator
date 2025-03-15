@@ -1,101 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UI Layout</title>
+  <title>iframe на треть экрана</title>
   <style>
     body {
-      background-color: #f4f4f4;
+      margin: 0;
       display: flex;
-      justify-content: center;
-      align-items: center;
       height: 100vh;
-      font-family: Arial, sans-serif;
     }
-
-    .container {
-      background-color: #d3d09e;
-      border-radius: 20px;
-      border: 3px solid #b4b272;
+    iframe {
+      width: 33.33%;
+      height: 33%;
+      border: none;
+    }
+    .content {
+      flex: 1;
+      background-color: #f0f0f0;
       padding: 20px;
-      width: 800px;
-      position: relative;
     }
-
-    .tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-   .tab {
-    /* flex: 1; */
-	min-width: 100px; /* либо фиксированная ширина, либо минимальная */
-	border: 2px solid #b4b272; /* Было 1px solid #777, теперь контрастнее */
-    text-align: center;
-    padding: 10px 0;
-    background-color: #f7f5cf;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-	margin-right: 5px;
-    border-bottom: none;
-    cursor: pointer;
-    user-select: none;
-    transition: background-color 0.3s;
-    clip-path: polygon(0% 0%, 100% 0%, 90% 100%, 10% 100%);
-}
-	.tab.active {
-    background-color: #fff;
-    font-weight: bold;
-}
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-
-    .card {
-      background-color: white;
-      border-radius: 15px;
-      height: 120px;
-      border: 3px solid #b4b272;
-    }
-
-    .arrow {
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 30px;
-      color: #b4b272;
-      cursor: pointer;
-    }
-
   </style>
 </head>
 <body>
-
-  <div class="container">
-    <div class="tabs">
-      <div class="tab active"></div>
-      <div class="tab"></div>
-      <div class="tab"></div>
-      <div class="tab"></div>
-      <div class="tab"></div>
-    </div>
-
-    <div class="arrow">&#10094;</div>
-
-    <div class="grid">
-      <div class="card"></div>
-      <div class="card"></div>
-      <div class="card"></div>
-      <div class="card"></div>
-      <div class="card"></div>
-      <div class="card"></div>
-    </div>
+  <iframe src="frame.html"></iframe>
+  <div class="content">
+    <h1>Основное содержимое</h1>
+    <p>Эта часть занимает оставшиеся две трети экрана.</p>
   </div>
-
 </body>
 </html>
