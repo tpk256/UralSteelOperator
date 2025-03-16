@@ -20,6 +20,7 @@ MAIN_STATE = "main";
 FIRST_POS_STATE = "fp";
 SECOND_POS_STATE = "sp";
 CREATE_TASK_STATE = "createT";
+EDIT_TASK_STATE = "editT"
 CURRENT_STATE = MAIN_STATE; // стейт установили
 
 TEMP_DATA = null;
@@ -266,18 +267,32 @@ function createRowData(rowOb, task_id, from, to, count, rowId){
               </th>
               `;
   //TODO добавить обработчик для Edit-Mode
+            // const edButton = rowOb.querySelector(`#edit-${rowId}`);
+            // edButton.addEventListener("click", () => {
+              
+            //     CURRENT_STATE = EDIT_TASK_STATE;
+            //     rowOb.innerHTML = `
+            //           <th>${task_id}</th>
+            //           <th id="f_p${rowId}"><button id="f_p-edit-${rowId}">${from}</button></th>
+            //           <th id="s_p${rowId}"><button id="s_p-edit-${rowId}">${to}</button></th>
+            //           <th id="count${rowId}"><input type="text" placeholder="количество" value="${count}"></th>
+            //           <th id="prior-${rowId}"> 
+            //                 <button class="disabled up">⬆️</button>
+            //                 <button class="disabled down">⬇️</button>
+            //           </th>
+            //           <th id="state-${rowId}"> 
+            //             ⏳
+            //           </th>
+            //           <th id="action-${rowId}">
+            //                 <button id="save-edit-${rowId}">Save</button>
 
-  // let from = "";
-  //             let to = ""
-  //             rectsData.forEach((place, _) => {
-  //               if (place.id == TEMP_DATA['f_p']){
-  //                   from = place.name;
-  //               }
-  //               if (place.id == TEMP_DATA['s_p']){
-  //                 to = place.name;
-  //               }
-  //             });
+            //           </th>
+            //           <th id="remove-${rowId}">
+            //                 <button id="remove-task-edit-${rowId}">Remove</button>
+            //           </th>
+            //     `;
 
+            // });
 
   // const data = {
   //   "from": TEMP_DATA['f_p'],
@@ -287,49 +302,31 @@ function createRowData(rowOb, task_id, from, to, count, rowId){
   //   "state": WAIT
   // }
 
-  rowOb.querySelector(".up").addEventListener("click" , () => {
-    console.log(rowId - 1);
-    console.log(TABLE_TASKS);
-      if (rowId == 1 || TABLE_TASKS[rowId - 1].state != WAIT)
-        return;
-
-      //Todo запрос проверка на возможность смены приоритетов для этих двух тасков
-
-      const row0 = document.querySelector(`#t-${rowId-1}`);
-      const row1 = document.querySelector(`#t-${rowId}`);
-      console.log("OKK")
-      const task0 = TABLE_TASKS[rowId]; console.log(task0);
-      const task1 =  TABLE_TASKS[rowId-1]; console.log(task1);
-      
-      createRowData(row0, task0.task_id, rectsNames[task0.from], rectsNames[task0.to], task0.count, rowId - 1);
-      createRowData(row1, task1.task_id, rectsNames[task1.from], rectsNames[task1.to], task1.count, rowId);
-
-      TABLE_TASKS[rowId] = task1;
-      TABLE_TASKS[rowId-1] = task0;
-
-
-  });
-  rowOb.querySelector(".down").addEventListener("click", () => {
-
-    //Todo запрос проверка на возможность смены приоритетов для этих двух тасков
-      if (rowId == 5 || TABLE_TASKS[rowId + 1] == null)
-        return; 
-
-    
-
-      const row0 = document.querySelector(`#t-${rowId+1}`);
+   let executer = function(direction_action) {
+      let inc = 1;
+      if (direction_action == "up"){
+        inc = -1;
+        if (rowId == 1 || TABLE_TASKS[rowId + inc].state != WAIT)
+          return;
+      }
+      if (direction_action == "down")
+        if (rowId == 5 || TABLE_TASKS[rowId + inc] == null)
+          return; 
+      const row0 = document.querySelector(`#t-${rowId + inc}`);
       const row1 = document.querySelector(`#t-${rowId}`);
 
       const task0 = TABLE_TASKS[rowId]; console.log(task0);
-      const task1 =  TABLE_TASKS[rowId+1]; console.log(task1);
-      
-      createRowData(row0, task0.task_id, rectsNames[task0.from], rectsNames[task0.to], task0.count, rowId + 1);
+      const task1 =  TABLE_TASKS[rowId + inc]; console.log(task1);
+
+      createRowData(row0, task0.task_id, rectsNames[task0.from], rectsNames[task0.to], task0.count, rowId + inc);
       createRowData(row1, task1.task_id, rectsNames[task1.from], rectsNames[task1.to], task1.count, rowId);
 
       TABLE_TASKS[rowId] = task1;
-      TABLE_TASKS[rowId+1] = task0;
+      TABLE_TASKS[rowId + inc] = task0;
+   } 
 
-  });
+  rowOb.querySelector(".up").addEventListener("click" , () => executer("up"));
+  rowOb.querySelector(".down").addEventListener("click", () => executer("down"));
 
 
 }
