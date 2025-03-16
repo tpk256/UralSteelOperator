@@ -74,22 +74,12 @@ text {
 }
 
 
-.bottom-fixed-form button {
 
-  padding: 5px;
-  background-color: #b6b171;
-  color: #fff;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s ease;
-}
 
 .tasks {
   position: absolute;
   width: 30vw;
-  height: 40vw;
+  height: 25vw;
   stroke: black;
   font-size: 1vw;
   pointer-events: none;
@@ -102,11 +92,14 @@ text {
 }
 .tasks th, td {
   border: 1px solid #333;
-  text-align: left;
-  padding: 0.3em;
+  text-align: center;
+  padding: 0.2em;
 }
 
-
+button .save {
+  width: 100%;
+  height: 100%;
+}
 
   </style>
 </head>
@@ -124,15 +117,19 @@ text {
           <table>
             <thead>
               <tr>
-                <th>№</th><th>Откуда</th><th>Куда</th><th>Количество</th><th>Приоритет</th><th>редактировать</th><th>удалить</th>
+                <th>№</th><th>Откуда</th><th>Куда</th><th>Количество</th><th>Приоритет</th><th>Статус</th><th>действие</th>
+                <th>
+                  <button id="create">+</button>
+                </th>
               </tr>
             </thead>
             <tbody class="Priority">
-              <tr id="1"></tr>
-              <tr id="2"></tr>
-              <tr id="3"></tr>
-              <tr id="4"></tr>
-              <tr id="5"></tr>
+              <tr id="t-1"></tr>
+              <tr id="t-2"></tr>
+              <tr id="t-3"></tr>
+              
+              <tr id="t-4"></tr>
+              <tr id="t-5"></tr>
             </tbody>
           </table>
 
@@ -140,14 +137,7 @@ text {
     </div>
 
 
-      <div class="hidden-content">
-      <form id="Form" class="bottom-fixed-form">
-        <label for="cnt">Количество листов</label>
-        <input id="cnt" class="count" type="text" name="count" placeholder="количество">
-      
-        <button class="create_task submit-btn" type="submit">Создать задание</button>
-      </form>
-      </div>
+     
 
   </div>
     <script>
@@ -181,10 +171,29 @@ text {
                   { id: 12, x: 200, y: 68,  width: 30, height: 10, color: "gray", name: "out" },
                   { id: 13, x: 235, y: 68,  width: 30, height: 10, color: "gray", name: "in"},
                 ];
+        
+                const rectsNames = {
+                  1: "#1",
+                  2: "#2" ,
+                  3: "#3" ,
+                  4: "#4" ,
+                  5: "#5" ,
+                  6: "#6" ,
+
+                  7: "f-load#1" ,
+                  8: "f-load#2" ,
+                  9: "f-load#3" ,
+
+                  10: "n-load#1" ,
+                  11: "n-load#2" ,
+
+                  12: "out" ,
+                  13: "in",
+                }
 
         const grayZone = [12, 13];
       
-        InitPage(rectsData, grayZone);
+        initPage(rectsData, grayZone);
         
     </script>
 </body>
