@@ -1,4 +1,6 @@
 function InitPage(rectsData, grayZone){
+    STATE_APP = "main";
+    
     svg.innerHTML = "";
     rectsData.forEach((rectData, index) => {
 
