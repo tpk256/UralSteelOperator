@@ -1,29 +1,38 @@
-ID_TASKS = 0;
+ID_TASKS_FOR_TEST = 0;
 
 
-const TABLE_TASKS = {
-    1: null,
-    2: null,
-    3: null,
-    4: null,
-    5: null
+
+tasks = {};
+for (let i = 0; i < 5; i++){
+  tasks[i] = {
+    task: null,
+    row: null
+  }
+}
+
+states_task_work = {
+  WAIT: 
+    {"value": 0, "text": "Не начато"},
+  IN_PROGRESS: 
+    {"value": 1, "text": "Выполняется"},
+  COMPLETED: 
+    {"value": -100, "text": "Выполняется"},
+}
+
+states_task_create = {
+  MAIN: 2,
+  FIRST_POS_STATE: 3,
+  SECOND_POS_STATE: 4,
+  SAVE_TASK_STATE: 5
+
+}
+
+CURRENT_STATE = states_task_create.MAIN; // стейт установили
+
+TEMP_DATA = {
+  row: null,
+  task: null
 };
-
-WAIT = 0;
-IN_PROGRESS = 1;
-READY = 2;
-
-COLOR_F_P = "green";
-COLOR_S_P = "red";
-
-MAIN_STATE = "main";
-FIRST_POS_STATE = "fp";
-SECOND_POS_STATE = "sp";
-CREATE_TASK_STATE = "createT";
-EDIT_TASK_STATE = "editT"
-CURRENT_STATE = MAIN_STATE; // стейт установили
-
-TEMP_DATA = null;
 
 function drawPage(rectsData){
           svg.innerHTML = "";
@@ -52,13 +61,14 @@ function drawPage(rectsData){
           const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
 
           const centerX = rectData.x + rectData.width / 2;
-          const centerY = rectData.y + rectData.height / 2;
+          const centerY = rectData.y + rectData.height * 0.85; //    / 2
 
           text.setAttribute('x', centerX);
           text.setAttribute('y', centerY);
           text.setAttribute('text-anchor', 'middle');             // Центрировать по горизонтали
           text.setAttribute('alignment-baseline', 'middle');      // Центрировать по вертикали
-          text.setAttribute('font-size', '6');                    // Размер шрифта, можешь поиграть
+          text.setAttribute('font-size', '5');                    // Размер шрифта, можешь поиграть
+          text.setAttribute("font-weight", "bold")
           text.setAttribute('fill', '#333');                      // Цвет шрифта
           text.textContent = `${rectData.name}`;                 // Текст в прямоугольнике
 
@@ -70,43 +80,55 @@ function drawPage(rectsData){
             // TODO дописать обработку тех или иных стейтов
 
             switch (CURRENT_STATE){
-              case MAIN_STATE:
+              case states_task_create.MAIN:
                 break;
 
-              case FIRST_POS_STATE:
-                TEMP_DATA["f_p"] = rect.id;
-                rect.setAttribute('fill', COLOR_F_P);
-                CURRENT_STATE = SECOND_POS_STATE;
-                rectsData.forEach((place, _) => {
-                  if (place.id == rect.id){
-                      const field = TEMP_DATA['row'].querySelector(`#f_p${TEMP_DATA['rowId']}`);
-                      field.innerText = place.name;
-                  }
-                });
-                const field = TEMP_DATA['row'].querySelector(`#s_p${TEMP_DATA['rowId']}`);
-                field.innerText = "...";
+              case states_task_create.FIRST_POS_STATE:
+
+                TEMP_DATA.from = rect.id;
+                rect.setAttribute('fill', "green");
+                CURRENT_STATE = states_task_create.SECOND_POS_STATE;
+
+                //Todo установить ограничения + запрос на сервер по количеству для позиции from
+                //count
+           
+        
+                console.log(` количество !!${TEMP_DATA.count}`)
+                normalizeTasks();
                 break;
               
-              case SECOND_POS_STATE:
-                TEMP_DATA["s_p"] = rect.id;
-                rect.setAttribute('fill', COLOR_S_P);
-                CURRENT_STATE = CREATE_TASK_STATE;
-                rectsData.forEach((place, _) => {
-                  if (place.id == rect.id){
-                      const field = TEMP_DATA['row'].querySelector(`#s_p${TEMP_DATA['rowId']}`);
-                      field.innerText = place.name;
-                  }
-                });
+              case states_task_create.SECOND_POS_STATE:
+                TEMP_DATA.to = rect.id;
+                rect.setAttribute('fill', "red");
 
-                const count_field = TEMP_DATA['row'].querySelector(`#count${TEMP_DATA['rowId']}`);
+
+                let res_count = tasks[TEMP_DATA.rowId].row.querySelector("input").value;
+                TEMP_DATA.count = res_count;
+
+
+                normalizeTasks();
+
+                const i = TEMP_DATA.rowId;
+                const btn_cancel = tasks[TEMP_DATA.rowId].row.querySelector(`#cancel-${i}`);
+                if (btn_cancel)
+                  btn_cancel.disabled = true;
+
+                tasks[TEMP_DATA.rowId].row.querySelector("input").disabled = true;
 
                 
-                count_field.innerHTML = `<input type="text" placeholder="количество">`
-                
-                //TODO  делаем запрос на количество листов на первой позиции.
-                const count_from_request = 0;
-                count_field.querySelector("input").setAttribute("value", count_from_request);
 
+
+                CURRENT_STATE = states_task_create.MAIN;
+                setTimeout( () => {
+                    //TODO Запрос на создание таска
+                    TEMP_DATA.id = ++ID_TASKS_FOR_TEST;
+                    TEMP_DATA.state = states_task_work.WAIT.value;
+                    TEMP_DATA = null;
+                    drawPage(rectsData, grayZone);
+                    normalizeTasks();
+
+
+                }, 1500); 
                 break;
 
             }
@@ -122,45 +144,196 @@ function drawPage(rectsData){
 
 function initPage(rectsData, grayZone){
     
-
     TABLE = document.querySelector(".tasks tbody"); 
-    const button_create = document.querySelector("#create");
-    button_create.addEventListener("click", () => {
+    //TODO подгружаем задачи со стейтами "not work" и "in working"
+    const data_upload = null;
 
 
-        // Проверка стейта на main
-        if (CURRENT_STATE != MAIN_STATE){
-          // Добавить при необходимости логику
-          console.log("Не могу добавить задание, так как состояние не main")
-          return;
-        }
-        
-        let free_row = null;
-        for (let i = 1; i <= 5; i++){
-            if (TABLE_TASKS[i] == null){
-              free_row = i;
-              break;
-            }
-        }
+    for (let i = 0; i < 5; i++)
+      tasks[i].row = document.querySelector(`#t-${i}`);
 
-        if (free_row == null){
-          // Нужно сверху уведомление дать, что места для создания задачи нет.
-        }
-        else
-          createTask(free_row);
-
-    });
-    data = null;
+    if (data_upload){
+        //Тут заполняются данные
+    }
+    else {
+      for (let i = 0; i < 5; i++)
+        tasks[i].task = null;
+    }
     
-    // TODO 1)подгрузим текущие в процессе и тп задачи, а дальше создадим строку для добавления
-    if (data == null){      //То есть задач созданных/в процессе НЕТ 
+    normalizeTasks();
 
+    drawPage(rectsData);
+}
+
+
+function normalizeTasks(){
+  for (let i = 0; i < 5; i++)
+    if (tasks[i].task && tasks[i].task.state == states_task_work.COMPLETED.value)
+      tasks[i].task = null;
+
+  for (let i = 0; i < 5; i++)
+    // if (tasks[i].task == null)
+      tasks[i].row.innerHTML = "";  
+  
+  //Теперь у нас идут подряд задачи
+  for (let i = 0; i < 5; i++){
+    if (tasks[i].task == null){
+      for (let j = i + 1; j < 5; j++){
+        if (tasks[j].task != null){
+          tasks[i].task = tasks[j].task;
+          tasks[j].task = null;
+          break;
+        }
+      }
+    }
+  }
+
+  console.log(`Для temp POSLE нормализации`);
+  console.log(TEMP_DATA);
+  
+  for (let i = 0; i < 5; i++){
+    if (tasks[i].task == null)
+      break;
+
+    if (tasks[i].task.id == -1)
+      TEMP_DATA.rowId = i;
+    
+    const row = tasks[i].row;
+    const task = tasks[i].task;
+
+
+    // todo отдельную обработку, если чел добавляет таск
+    
+
+    temp_html = `
+    <td>${task.id}</td>
+    <td>${rectsNames[task.from]}</td>
+    <td>${rectsNames[task.to]}</td>
+    `;
+    
+    let disabled_count_field = false;
+    if (task.from == 100)
+      disabled_count_field = true;
+    if (task.to != 101)
+      disabled_count_field = true;
+
+
+    if (task.id == -1){
+      //Таск только создается;
+      temp_html += `
+      <td><input type="number" id="quantity-${i}" name="quantity" min="1" max="1000" step="1" value="${task.count}" ${disabled_count_field? "disabled": ""}></td>
+      <td>Не создано</td>
+      <td><button id ="cancel-${i}">Отмена</button></td>
+      `;
+
+    
+
+
+    }
+    else if (task.state == states_task_work.WAIT.value){
+      temp_html += `
+      <td><input type="number" id="quantity-${i}" name="quantity" min="1" max="1000" step="1" value="${task.count}" ${disabled_count_field? "disabled": ""}></td>
+      <td>${states_task_work.WAIT.text}</td>
+      <td><button id ="remove-${i}">Удалить</button></td>
+      `;
     }
     else{
-        free_space = null;
+      temp_html += `
+      <td><input type="number" id="quantity-${i}" name="quantity" min="1" max="1000" step="1" value="${task.count}" disabled></td>
+      <td>${states_task_work.IN_PROGRESS.text}</td>
+      `;
     }
-    drawPage(rectsData);
-   }
+
+    row.innerHTML = temp_html;
+
+    const cancel_button = row.querySelector(`#cancel-${i}`);
+    if (cancel_button){
+      cancel_button.addEventListener("click", () => {
+        tasks[i].task = null;
+        TEMP_DATA = null;
+        CURRENT_STATE = states_task_create.MAIN;
+        drawPage(rectsData, null);
+        normalizeTasks();
+
+      });
+    }
+    const rem_button = row.querySelector(`#remove-${i}`);
+    const input_field = row.querySelector(`#quantity-${i}`)
+    if (rem_button != null){
+
+
+      // Todo дописать обработчик
+      input_field.addEventListener('input', () => {
+
+      });
+
+      rem_button.addEventListener('click', () => {
+
+        const row_id = i;
+        console.log(`УДаляем ${row_id}`);
+        if (tasks[row_id].task.id != -1){
+           // TODO отправляем запрос на удаление нашего таска
+        }
+
+        tasks[i].task = null;
+        console.log(tasks);
+        console.log(`Для temp DO нормализации`);
+        console.log(TEMP_DATA);
+  
+        normalizeTasks();
+
+    });
+
+  }
+
+  };
+
+  if (CURRENT_STATE != states_task_create.MAIN)
+    return;
+
+  let empty_row  = -1;
+  for (let i = 0; i < 5; i++){
+    if (tasks[i].task == null){
+      empty_row = i;
+      break;
+    }
+  }
+  if (empty_row < 0)
+    return;
+
+
+  const row_fill = tasks[empty_row].row;
+  row_fill.innerHTML = `
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td><button id="add-${empty_row}">+</button></td>`;
+    
+    row_fill.querySelector(`#add-${empty_row}`).addEventListener('click', () => {
+        CURRENT_STATE = states_task_create.FIRST_POS_STATE;
+        
+        TEMP_DATA = {
+          id: -1,
+          rowId: empty_row,
+          from: 100,
+          to: 101,
+          count: 1,
+          state: -1,
+          limit: false
+        };
+        tasks[empty_row].task = TEMP_DATA;
+        console.log(empty_row);
+        console.log(tasks);
+        normalizeTasks();
+
+
+    });
+  
+
+};
+
 
 
 
@@ -248,91 +421,5 @@ function initPage(rectsData, grayZone){
     console.log(row);
 
   }
-function createRowData(rowOb, task_id, from, to, count, rowId){
-
-  rowOb.innerHTML = `
-              <th>${task_id}</th>
-              <th id="f_p${rowId}">${from}</th>
-              <th id="s_p${rowId}">${to}</th>
-              <th id="count${rowId}">${count}</th>
-              <th id="prior-${rowId}"> 
-                    <button class="up">⬆️</button>
-                    <button class="down">⬇️</button>
-              </th>
-              <th id="state-${rowId}"> 
-                ⏳
-              </th>
-              <th id="action-${rowId}">
-                    <button id="edit-${rowId}">Edit-mode</button>
-              </th>
-              `;
-  //TODO добавить обработчик для Edit-Mode
-            // const edButton = rowOb.querySelector(`#edit-${rowId}`);
-            // edButton.addEventListener("click", () => {
-              
-            //     CURRENT_STATE = EDIT_TASK_STATE;
-            //     rowOb.innerHTML = `
-            //           <th>${task_id}</th>
-            //           <th id="f_p${rowId}"><button id="f_p-edit-${rowId}">${from}</button></th>
-            //           <th id="s_p${rowId}"><button id="s_p-edit-${rowId}">${to}</button></th>
-            //           <th id="count${rowId}"><input type="text" placeholder="количество" value="${count}"></th>
-            //           <th id="prior-${rowId}"> 
-            //                 <button class="disabled up">⬆️</button>
-            //                 <button class="disabled down">⬇️</button>
-            //           </th>
-            //           <th id="state-${rowId}"> 
-            //             ⏳
-            //           </th>
-            //           <th id="action-${rowId}">
-            //                 <button id="save-edit-${rowId}">Save</button>
-
-            //           </th>
-            //           <th id="remove-${rowId}">
-            //                 <button id="remove-task-edit-${rowId}">Remove</button>
-            //           </th>
-            //     `;
-
-            // });
-
-  // const data = {
-  //   "from": TEMP_DATA['f_p'],
-  //   "to": TEMP_DATA['s_p'],
-  //   "count": TEMP_DATA['count'],
-  //   "prioraty": TEMP_DATA['rowId'],
-  //   "state": WAIT
-  // }
-
-   let executer = function(direction_action) {
-      let inc = 1;
-      if (direction_action == "up"){
-        inc = -1;
-        if (rowId == 1 || TABLE_TASKS[rowId + inc].state != WAIT)
-          return;
-      }
-      if (direction_action == "down")
-        if (rowId == 5 || TABLE_TASKS[rowId + inc] == null)
-          return; 
-      const row0 = document.querySelector(`#t-${rowId + inc}`);
-      const row1 = document.querySelector(`#t-${rowId}`);
-
-      const task0 = TABLE_TASKS[rowId]; console.log(task0);
-      const task1 =  TABLE_TASKS[rowId + inc]; console.log(task1);
-
-      createRowData(row0, task0.task_id, rectsNames[task0.from], rectsNames[task0.to], task0.count, rowId + inc);
-      createRowData(row1, task1.task_id, rectsNames[task1.from], rectsNames[task1.to], task1.count, rowId);
-
-      TABLE_TASKS[rowId] = task1;
-      TABLE_TASKS[rowId + inc] = task0;
-   } 
-
-  rowOb.querySelector(".up").addEventListener("click" , () => executer("up"));
-  rowOb.querySelector(".down").addEventListener("click", () => executer("down"));
 
 
-}
-
-
-function normalizeRowsData(){
-
-}
-  function editModeON(){}
