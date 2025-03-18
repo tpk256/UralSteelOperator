@@ -10,6 +10,8 @@ for (let i = 0; i < 5; i++){
   }
 }
 
+rect_from_one_list = ["13", ];
+cant_be_first_pos = ["12"];
 states_task_work = {
   WAIT: 
     {"value": 0, "text": "Не начато"},
@@ -85,19 +87,33 @@ function drawPage(rectsData){
 
               case states_task_create.FIRST_POS_STATE:
 
+                if (cant_be_first_pos.includes(rect.id))
+                  return;
                 TEMP_DATA.from = rect.id;
                 rect.setAttribute('fill', "green");
                 CURRENT_STATE = states_task_create.SECOND_POS_STATE;
 
-                //Todo установить ограничения + запрос на сервер по количеству для позиции from
+
+                if (rect_from_one_list.includes(TEMP_DATA.from)){
+                    TEMP_DATA.count = 1;
+                    TEMP_DATA.limit = true;
+                }
+                else{
+
+                }
+                //Todo запрос на сервер по количеству для позиции from
                 //count
-           
+
+
+                
         
                 console.log(` количество !!${TEMP_DATA.count}`)
                 normalizeTasks();
                 break;
               
               case states_task_create.SECOND_POS_STATE:
+                if (TEMP_DATA.from == rect.id)
+                  return; // не можем указать одну и ту же позиция как для from, так и to
                 TEMP_DATA.to = rect.id;
                 rect.setAttribute('fill', "red");
 
@@ -172,7 +188,6 @@ function normalizeTasks(){
       tasks[i].task = null;
 
   for (let i = 0; i < 5; i++)
-    // if (tasks[i].task == null)
       tasks[i].row.innerHTML = "";  
   
   //Теперь у нас идут подряд задачи
@@ -202,7 +217,7 @@ function normalizeTasks(){
     const task = tasks[i].task;
 
 
-    // todo отдельную обработку, если чел добавляет таск
+ 
     
 
     temp_html = `
@@ -215,6 +230,9 @@ function normalizeTasks(){
     if (task.from == 100)
       disabled_count_field = true;
     if (task.to != 101)
+      disabled_count_field = true;
+
+    if(task.limit == true)
       disabled_count_field = true;
 
 
