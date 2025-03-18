@@ -133,6 +133,15 @@ button .save {
   height: 100%;
 }
 
+/* button.color {
+
+  background: none;прозрачный фон кнопки 
+  border: none;     убираем границу
+  cursor: pointer;  курсор при наведении 
+} */
+
+
+
   </style>
 </head>
 <body>
@@ -184,19 +193,19 @@ button .save {
         const offset = 20;
         const rectsData = [
                   
-                  { id: 1, x: 215,   y: 95,  width: 47 + offset, height: 30, name: "ШТРИПС, БР№ 1;2"},
-                  { id: 3, x: 265 + offset,  y: 95,  width: 47+ offset, height: 30, name: "ШТРИПС, БР№ 3;4" },
+                  { id: 1, x: 215,   y: 95,  width: 47 + offset, height: 30, name: "Склад №1"},
+                  { id: 3, x: 265 + offset,  y: 95,  width: 47+ offset, height: 30, name: "Склад №2" },
 
-                  { id: 2, x: 215,  y: 130,  width: 47 + offset, height: 30, name: "БРИГАДА №1"} ,
-                  { id: 4, x: 265 + offset,   y: 130,  width: 47 + offset, height: 30, name: "БРИГАДА №2" },
+                  { id: 2, x: 215,  y: 130,  width: 47 + offset, height: 30, name: "Склад №3"} ,
+                  { id: 4, x: 265 + offset,   y: 130,  width: 47 + offset, height: 30, name: "Склад №4" },
 
-                  { id: 5, x: 215,  y: 165,  width: 47 + offset, height: 30, name: "БРИГАДА №4" },
-                  { id: 6, x: 265 + offset,  y: 165,  width: 47 + offset, height: 30, name: "БРИГАДА №3" },
+                  { id: 5, x: 215,  y: 165,  width: 47 + offset, height: 30, name: "Склад №5" },
+                  { id: 6, x: 265 + offset,  y: 165,  width: 47 + offset, height: 30, name: "Склад №6" },
 
                   { id: 8, x: 5, y: 165,  width: 47 + offset, height: 30, name: "Изолятор брака" },
                   { id: 9, x: 57 + offset, y: 165,  width: 47 + offset , height: 30, name: "Кантователь" },
 
-                  { id: 7, x: 5, y: 130,  width: 65 + offset, height: 30, name: "Стенд для зачистки МОР" },
+                  { id: 7, x: 5, y: 130,  width: 47 + offset, height: 30, name: "Стенд для зачистки" },
                   
                   
                   { id: 10, x: 318 + offset * 2, y: 165,  width: 47 + offset, height: 30, name: "Выход" },
@@ -207,12 +216,12 @@ button .save {
                 ];
         
                 const rectsNames = {
-                  1: "ШТРИПС,БР 1;2",
-                  2: "БР-1" ,
-                  3: "ШТРИПС,БР 3;4" ,
-                  4: "БР-2" ,
-                  5: "БР-4" ,
-                  6: "БР-3" ,
+                  1: "Склад №1",
+                  2: "Склад №3" ,
+                  3: "Склад №2" ,
+                  4: "Склад №4" ,
+                  5: "Склад №5" ,
+                  6: "Склад №6" ,
 
                   7: "Стенд МОР" ,
                   8: "Изолятор брака" ,

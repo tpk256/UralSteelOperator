@@ -241,7 +241,11 @@ function normalizeTasks(){
       temp_html += `
       <td><input type="number" id="quantity-${i}" name="quantity" min="1" max="1000" step="1" value="${task.count}" ${disabled_count_field? "disabled": ""}></td>
       <td>Не создано</td>
-      <td><button id ="cancel-${i}">Отмена</button></td>
+      <td>
+        <button class="color" id ="cancel-${i}">
+          <img src="cancel.svg">
+        </button>
+      </td>
       `;
 
     
@@ -252,7 +256,11 @@ function normalizeTasks(){
       temp_html += `
       <td><input type="number" id="quantity-${i}" name="quantity" min="1" max="1000" step="1" value="${task.count}" ${disabled_count_field? "disabled": ""}></td>
       <td>${states_task_work.WAIT.text}</td>
-      <td><button id ="remove-${i}">Удалить</button></td>
+      <td>
+        <button class="color" id ="remove-${i}"> 
+          <img src="delete.svg">
+        </button>
+      </td>
       `;
     }
     else{
@@ -327,7 +335,11 @@ function normalizeTasks(){
     <td></td>
     <td></td>
     <td></td>
-    <td><button id="add-${empty_row}">+</button></td>`;
+    <td>
+      <button id="add-${empty_row}">
+        <img src="add.svg">
+      </button>
+    </td>`;
     
     row_fill.querySelector(`#add-${empty_row}`).addEventListener('click', () => {
         CURRENT_STATE = states_task_create.FIRST_POS_STATE;
