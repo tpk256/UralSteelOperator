@@ -271,6 +271,7 @@ function normalizeTasks(){
       temp_html += `
       <td><input type="number" id="quantity-${i}" name="quantity" min="1" max="1000" step="1" value="${task.count}" disabled></td>
       <td>${states_task_work.IN_PROGRESS.text}</td>
+      <td></td>
       `;
     }
 
@@ -323,35 +324,45 @@ function normalizeTasks(){
 
 
   let flag = 0;
+  let in_progss = false;
+
   for (let i = 0; i < 5; i++){
       if (tasks[i].task == null){
         flag += 1;
       }
+      else
+        if (tasks[i].task.state == states_task_work.IN_PROGRESS.value)
+            in_progss = true;
+      
   }
 
-  if (flag == 0)
+  if (flag == 0 )
     return;
 
   
-  if (flag == 5){
-    const row_fill = tasks[0].row;
+  if (flag == 5 || (flag == 4 && in_progss)){
+
+    let rId = 0;
+    if (flag == 4 && in_progss)
+      rId = 1;
+    const row_fill = tasks[rId].row;
         row_fill.innerHTML = `
           <td></td>
           <td></td>
           <td></td>
           <td></td>
           <td>
-            <button class="tyt" id="add-${0}">
+            <button class="tyt" id="add-${rId}">
               <img src="add.svg">
             </button>
           </td>`;
 
-          row_fill.querySelector(`#add-${0}`).addEventListener('click', () => {
+          row_fill.querySelector(`#add-${rId}`).addEventListener('click', () => {
             CURRENT_STATE = states_task_create.FIRST_POS_STATE;
             
             TEMP_DATA = {
               id: -1,
-              rowId: 0,  
+              rowId: rId,  
               from: 100,
               to: 101,
               count: 1,
@@ -359,40 +370,30 @@ function normalizeTasks(){
               limit: false
             };
             //Сдвигаем все задачи на 1
-            for(let j = 4; j > 0 + 1; j--){
-              tasks[j].task = tasks[j - 1].task;
-            }
+            // for(let j = 4; j > 0 + 1; j--){
+            //   tasks[j].task = tasks[j - 1].task;
+            // }
 
 
-            tasks[0].task = TEMP_DATA;
-            console.log(0);
+            tasks[rId].task = TEMP_DATA;
+            console.log(rId);
             console.log(tasks);
             normalizeTasks();
   }) }
+
+ 
   else {
     
   
 
     for (let i = 0; i < 5; i++){
-      if (tasks[i].task != null){
+      if ((tasks[i].task != null) && (tasks[i].task.state == 0)){
         const row_fill = tasks[i].row;
 
         const button_add = document.createElement('button');
         button_add.innerHTML = '<img src="add.svg">';
         button_add.id = `add-${i}`;
         row_fill.querySelector('.tyt').appendChild(button_add);
-
-        // row_fill.innerHTML = `
-        //   <td></td>
-        //   <td></td>
-        //   <td></td>
-        //   <td></td>
-        //   <td></td>
-        //   <td>
-        //     <button id="add-${i}">
-        //       <img src="add.svg">
-        //     </button>
-        //   </td>`;
 
           row_fill.querySelector(`#add-${i}`).addEventListener('click', () => {
             CURRENT_STATE = states_task_create.FIRST_POS_STATE;
