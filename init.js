@@ -219,9 +219,9 @@ function normalizeTasks(){
 
  
     
-
+    // <td>${task.id}</td>
     temp_html = `
-    <td>${task.id}</td>
+    
     <td>${rectsNames[task.from]}</td>
     <td>${rectsNames[task.to]}</td>
     `;
@@ -235,7 +235,7 @@ function normalizeTasks(){
     if(task.limit == true)
       disabled_count_field = true;
 
-
+    
     if (task.id == -1){
       //Таск только создается;
       temp_html += `
@@ -253,10 +253,14 @@ function normalizeTasks(){
 
     }
     else if (task.state == states_task_work.WAIT.value){
+      let count_task = 0;
+      for( let i =0; i < 5; i++)
+        if (tasks[i].task != null)
+          count_task++;
       temp_html += `
       <td><input type="number" id="quantity-${i}" name="quantity" min="1" max="1000" step="1" value="${task.count}" ${disabled_count_field? "disabled": ""}></td>
       <td>${states_task_work.WAIT.text}</td>
-      <td>
+      <td ${CURRENT_STATE != states_task_create.MAIN || count_task == 5? "": 'class="tyt"' }>
         <button class="color" id ="remove-${i}"> 
           <img src="delete.svg">
         </button>
@@ -311,55 +315,122 @@ function normalizeTasks(){
     });
 
   }
-
+  
   };
 
   if (CURRENT_STATE != states_task_create.MAIN)
     return;
 
-  let empty_row  = -1;
+
+  let flag = 0;
   for (let i = 0; i < 5; i++){
-    if (tasks[i].task == null){
-      empty_row = i;
-      break;
-    }
+      if (tasks[i].task == null){
+        flag += 1;
+      }
   }
-  if (empty_row < 0)
+
+  if (flag == 0)
     return;
 
+  
+  if (flag == 5){
+    const row_fill = tasks[0].row;
+        row_fill.innerHTML = `
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>
+            <button class="tyt" id="add-${0}">
+              <img src="add.svg">
+            </button>
+          </td>`;
 
-  const row_fill = tasks[empty_row].row;
-  row_fill.innerHTML = `
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td>
-      <button id="add-${empty_row}">
-        <img src="add.svg">
-      </button>
-    </td>`;
+          row_fill.querySelector(`#add-${0}`).addEventListener('click', () => {
+            CURRENT_STATE = states_task_create.FIRST_POS_STATE;
+            
+            TEMP_DATA = {
+              id: -1,
+              rowId: 0,  
+              from: 100,
+              to: 101,
+              count: 1,
+              state: -1,
+              limit: false
+            };
+            //Сдвигаем все задачи на 1
+            for(let j = 4; j > 0 + 1; j--){
+              tasks[j].task = tasks[j - 1].task;
+            }
+
+
+            tasks[0].task = TEMP_DATA;
+            console.log(0);
+            console.log(tasks);
+            normalizeTasks();
+  }) }
+  else {
     
-    row_fill.querySelector(`#add-${empty_row}`).addEventListener('click', () => {
-        CURRENT_STATE = states_task_create.FIRST_POS_STATE;
-        
-        TEMP_DATA = {
-          id: -1,
-          rowId: empty_row,
-          from: 100,
-          to: 101,
-          count: 1,
-          state: -1,
-          limit: false
-        };
-        tasks[empty_row].task = TEMP_DATA;
-        console.log(empty_row);
-        console.log(tasks);
-        normalizeTasks();
+  
+
+    for (let i = 0; i < 5; i++){
+      if (tasks[i].task != null){
+        const row_fill = tasks[i].row;
+
+        const button_add = document.createElement('button');
+        button_add.innerHTML = '<img src="add.svg">';
+        button_add.id = `add-${i}`;
+        row_fill.querySelector('.tyt').appendChild(button_add);
+
+        // row_fill.innerHTML = `
+        //   <td></td>
+        //   <td></td>
+        //   <td></td>
+        //   <td></td>
+        //   <td></td>
+        //   <td>
+        //     <button id="add-${i}">
+        //       <img src="add.svg">
+        //     </button>
+        //   </td>`;
+
+          row_fill.querySelector(`#add-${i}`).addEventListener('click', () => {
+            CURRENT_STATE = states_task_create.FIRST_POS_STATE;
+            
+            TEMP_DATA = {
+              id: -1,
+              rowId: i + 1,  //Заполнается задача после этой
+              from: 100,
+              to: 101,
+              count: 1,
+              state: -1,
+              limit: false
+            };
+            //Сдвигаем все задачи на 1
+            for(let j = 4; j > i + 1; j--){
+              tasks[j].task = tasks[j - 1].task;
+            }
 
 
-    });
+            tasks[i + 1].task = TEMP_DATA;
+            console.log(i + 1);
+            console.log(tasks);
+            normalizeTasks();
+    
+    
+        });
+
+     }
+
+
+  }
+}
+
+
+
+  
+    
+    
   
 
 };
