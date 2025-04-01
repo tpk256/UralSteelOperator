@@ -99,9 +99,23 @@ function drawPage(rectsData){
                     TEMP_DATA.limit = true;
                 }
                 else{
-
+                    fetch(
+                      `/place/${TEMP_DATA.from}`,
+                      {
+                        method: 'GET',
+                      }
+                    ).then(response => {
+                      if (!response.ok) {
+                        return {count: 1}
+                      }
+                      return response.json();
+                    }).then(
+                      data => {
+                        TEMP_DATA.count = data.count;
+                      }
+                    )
                 }
-                //Todo запрос на сервер по количеству для позиции from
+                //Todo запрос на сервер по количеству для позиции from +
                 //count
 
 
@@ -243,7 +257,7 @@ function normalizeTasks(){
       <td>Не создано</td>
       <td>
         <button class="color" id ="cancel-${i}">
-          <img src="cancel.svg">
+          <img src="/static/cancel.svg">
         </button>
       </td>
       `;
@@ -262,7 +276,7 @@ function normalizeTasks(){
       <td>${states_task_work.WAIT.text}</td>
       <td ${CURRENT_STATE != states_task_create.MAIN || count_task == 5? "": 'class="tyt"' }>
         <button class="color" id ="remove-${i}"> 
-          <img src="delete.svg">
+          <img src="/static/delete.svg">
         </button>
       </td>
       `;
@@ -353,7 +367,7 @@ function normalizeTasks(){
           <td></td>
           <td>
             <button class="tyt" id="add-${rId}">
-              <img src="add.svg">
+              <img src="/static/add.svg">
             </button>
           </td>`;
 
@@ -391,7 +405,7 @@ function normalizeTasks(){
         const row_fill = tasks[i].row;
 
         const button_add = document.createElement('button');
-        button_add.innerHTML = '<img src="add.svg">';
+        button_add.innerHTML = '<img src="/static/add.svg">';
         button_add.id = `add-${i}`;
         row_fill.querySelector('.tyt').appendChild(button_add);
 
