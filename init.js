@@ -18,7 +18,7 @@ states_task_work = {
   IN_PROGRESS: 
     {"value": 1, "text": "Выполняется"},
   COMPLETED: 
-    {"value": -100, "text": "Выполняется"},
+    {"value": -100, "text": "Завершено"},
 }
 
 states_task_create = {
@@ -111,12 +111,14 @@ function drawPage(rectsData){
                       return response.json();
                     }).then(
                       data => {
+                        console.log("sdasd");
+                        const count_field = tasks[TEMP_DATA.rowId].row.querySelector("input");
                         TEMP_DATA.count = data.count;
+                        count_field.setAttribute("value", data.count);
+                        count_field.setAttribute("max", data.count);
                       }
                     )
                 }
-                //Todo запрос на сервер по количеству для позиции from +
-                //count
 
 
                 
@@ -149,16 +151,105 @@ function drawPage(rectsData){
 
 
                 CURRENT_STATE = states_task_create.MAIN;
-                setTimeout( () => {
-                    //TODO Запрос на создание таска
-                    TEMP_DATA.id = ++ID_TASKS_FOR_TEST;
-                    TEMP_DATA.state = states_task_work.WAIT.value;
-                    TEMP_DATA = null;
-                    drawPage(rectsData, grayZone);
+                fetch(
+                  '/task/',
+                  {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        from_: TEMP_DATA.from,
+                        to: TEMP_DATA.to,
+                        count: TEMP_DATA.count,
+                      }
+                    )
+                  }
+                ).then(response => {
+                  if (!response.ok) {
+                    throw new Error();
+                  }
+                  return response.json();
+                }).then(
+                  data => {
+                    console.log(`Данные по созданию id: ${data.id}`);
+                    if ( data.id && data.id >= 0){
+                              TEMP_DATA.id = data.id;
+                              TEMP_DATA.state = states_task_work.WAIT.value;
+                              TEMP_DATA = null;
+
+
+                              //Обновляем порядок задач
+                              let order_task_id = [];
+                              for (let i = 0; i < 5; i++)
+                                if (tasks[i].task != null)
+                                  order_task_id.push(tasks[i].task.id);
+                                else
+                                  order_task_id.push(-1);
+
+                              console.log(order_task_id);
+                              fetch("/task/order",
+                                {
+                                  method: "PUT",
+                                  headers: {
+                                    'Content-Type': 'application/json'
+                                  },
+                                  body: JSON.stringify({
+                                    tasks_id: order_task_id
+                                  })
+                                }
+
+                              ).then(response => {
+                                if (!response.ok) {
+                                  throw new Error();
+                                }
+                                return response.json();
+                              }).then(data => {
+                                  let order_task_id = data.tasks_id;
+                                  console.log(order_task_id);
+                                  let flag = false;
+                                  for (let i = 0; i < 5; i++){
+                                      let t_id = -1;
+                                      if (tasks[i].task!= null)
+                                        t_id = tasks[i].task.id;
+
+                                      if (t_id != order_task_id[i]){
+                                        flag = True;
+                                        break;
+                                      }
+                                  }
+                                  if (flag){
+                                    console.log(order_task_id);
+                                    for (let i = 0; i < 5; i++){
+                                      if (tasks[i].task == null) continue;
+                                      if (tasks[i].task.id != order_task_id[i]){
+                                        for (let j = 0; j < 5; j++){
+                                          if (tasks[j].task == null) continue;
+                                          if (tasks[j].task.id == order_task_id[i]){
+                                            let temp_task = tasks[i].task;
+                                            tasks[i].task = tasks[j].task;
+                                            tasks[j].task = temp_task;
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+
+
+                              });
+                    }
+                    else {
+                      tasks[TEMP_DATA.rowId].task = null;
+                      TEMP_DATA = null;
+                      //TODO уведомить что таск не создался +-
+                      
+                    }
+                    setTimeout( ()=> {drawPage(rectsData, grayZone);}, 1000)
+                    
                     normalizeTasks();
-
-
-                }, 1500); 
+                  }
+                );
+                
                 break;
 
             }
@@ -175,22 +266,45 @@ function drawPage(rectsData){
 function initPage(rectsData, grayZone){
     
     TABLE = document.querySelector(".tasks tbody"); 
-    //TODO подгружаем задачи со стейтами "not work" и "in working"
+    
+    
     const data_upload = null;
 
 
     for (let i = 0; i < 5; i++)
       tasks[i].row = document.querySelector(`#t-${i}`);
 
-    if (data_upload){
-        //Тут заполняются данные
-    }
-    else {
-      for (let i = 0; i < 5; i++)
-        tasks[i].task = null;
-    }
+    for (let i = 0; i < 5; i++)
+      tasks[i].task = null;
+
+   
+    fetch("/task/?count=5",
+            {
+              method: "GET",
+            }
+
+          ).then(response => {
+            if (!response.ok) {
+              throw new Error();
+            }
+            return response.json();
+          }).then( data => {
+                  if (data.count != 0)
+                    for( let i = 0; i < data.count; i++){
+                      const task_data = data.tasks[i];
+                      tasks[i].task = {
+                        id: task_data.id,
+                        to: task_data.to,
+                        from: task_data.from_,
+                        state: task_data.state,
+                        count: task_data.count
+                      }
+                    }
+                  normalizeTasks();
+              }
+          )
+    setInterval(CheckTasksState, 3000);
     
-    normalizeTasks();
 
     drawPage(rectsData);
 }
@@ -304,28 +418,51 @@ function normalizeTasks(){
     }
     const rem_button = row.querySelector(`#remove-${i}`);
     const input_field = row.querySelector(`#quantity-${i}`)
+
+    if (rem_button == null){
+      input_field.addEventListener('input', () => {
+        TEMP_DATA.count = input_field.value;
+        console.log("INPUT FLAG!!!")
+
+    });
+    }
     if (rem_button != null){
 
 
-      // Todo дописать обработчик
-      input_field.addEventListener('input', () => {
 
-      });
+      
 
       rem_button.addEventListener('click', () => {
 
         const row_id = i;
         console.log(`УДаляем ${row_id}`);
         if (tasks[row_id].task.id != -1){
-           // TODO отправляем запрос на удаление нашего таска
+           fetch(`/task/${tasks[row_id].task.id}`,
+              {
+                method: "DELETE" 
+              }
+
+            ).then(response => {
+              if (!response.ok) {
+                throw new Error();
+              }
+              return response.json();
+            }).then( data => {
+                if (data.id == tasks[row_id].task.id){
+                  tasks[i].task = null;
+                }
+                normalizeTasks();
+
+                
+            })
         }
 
-        tasks[i].task = null;
+        
         console.log(tasks);
         console.log(`Для temp DO нормализации`);
         console.log(TEMP_DATA);
   
-        normalizeTasks();
+        
 
     });
 
@@ -441,101 +578,58 @@ function normalizeTasks(){
   }
 }
 
-
-
-  
-    
-    
-  
-
 };
 
 
 
-
-  function createTask(rowId){
-    console.log(rowId);
-    CURRENT_STATE = FIRST_POS_STATE;
-    const row = document.querySelector(`#t-${rowId}`);
-    TEMP_DATA = {
-      "row": row,
-      "rowId": rowId
-    };
-
-
-    row.innerHTML = `
-    <th>-</th>
-    <th id="f_p${rowId}">Ожидаю</th>
-    <th id="s_p${rowId}">-</th>
-    <th id="count${rowId}">-</th>
-    <th>-</th>
-    <th>-</th>
-    <th>-</th>
-    <th><button class="save" id="save${rowId}">Save</th>
-    `;
-    row.querySelector("button").addEventListener("click", () => {
-        if (CURRENT_STATE == CREATE_TASK_STATE){
-            const count_field = row.querySelector(`#count${TEMP_DATA['rowId']} input`);
-
-            TEMP_DATA['count'] = count_field.value; // TODO проверка на валидность ввода
-
-            const data = {
-              "from": TEMP_DATA['f_p'],
-              "to": TEMP_DATA['s_p'],
-              "count": TEMP_DATA['count'],
-              "prioraty": TEMP_DATA['rowId'],
-              "state": WAIT
+function CheckTasksState(){
+  
+            fetch("/task/?count=5",
+            {
+              method: "GET",
             }
 
-            //TODO отправляем post запрос с data
-            ID_TASKS++;
-            const resp = {
-              "task_id": ID_TASKS,
+          ).then(response => {
+            if (!response.ok) {
+              throw new Error();
             }
-            if (resp.task_id != null){
+            return response.json();
+          }).then( data => {
+                    let task_active = [];
+                    let flag_changes = false;
+                    for( let i = 0; i < 5; i++){
+                      for (let j = 0; j < data.count; j++){
+                          info_task = data.tasks[j];
+                          if (tasks[i].task && (tasks[i].task.id == info_task.id)){
+                              task_active.push(tasks[i].task.id);
+                              console.log(`СОСТОЯНИЕ СЕЙЧАС ${tasks[i].task.state}`);
+                              if (tasks[i].task.state != info_task.state)
+                                flag_changes = true;
+                              tasks[i].task.state = info_task.state;
+                              console.log(`СОСТОЯНИЕ ПОСЛЕ ${tasks[i].task.state}`);
+                              if (tasks[i].task.state == states_task_work.COMPLETED.value){
+                                tasks[i].task = null;
+                                
+                                console.log("СТЕЙТЫ АПДЕЙТ!!!")
+                              }
 
-              let from = "";
-              let to = ""
-              rectsData.forEach((place, _) => {
-                if (place.id == TEMP_DATA['f_p']){
-                    from = place.name;
-                }
-                if (place.id == TEMP_DATA['s_p']){
-                  to = place.name;
-                }
-              });
+                          }
 
-              
-              createRowData(TEMP_DATA['row'], resp.task_id, from, to, TEMP_DATA['count'], TEMP_DATA['rowId']);
+                      }
+                    }
+                    for (let i = 0; i < 5; i++){
+                        if (tasks[i].task == null) continue;
+                        if (!task_active.includes(tasks[i].task.id) && (tasks[i].task.id != -1 )){
+                          flag_changes = true;
+                          tasks[i].task = null;
+                        }
+                    }
+                    if (flag_changes)   //если что поменялось, то надо перерисовать
+                        normalizeTasks();
+              }
+          )
 
-              //todo нацепить обработчики на смену приоритета, edit-mode, remove.
-              TABLE_TASKS[rowId] = data;
-              TABLE_TASKS[rowId].task_id = resp.task_id; // обновляем инфу по
-            }
-            else{
-              //TODO Как-нибудь уведомляем оператора, что задание не удалось создать
-            }
-
-            
-
-            // восстановить цвета у ректанглов
-            rectsData.forEach((rect, i) => {
-                if (rect.id == TEMP_DATA['f_p'] || rect.id == TEMP_DATA['s_p']){
-                  if (grayZone.includes(rect.id))
-                    document.getElementById(rect.id).setAttribute("fill", "gray");
-                  else
-                    document.getElementById(rect.id).setAttribute("fill", "white");
-                }
-            });
-
-
-            CURRENT_STATE = MAIN_STATE;
-            TEMP_DATA = null;
-
-        }
-    });
-    console.log(row);
-
-  }
+}
+  
 
 
