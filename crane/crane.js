@@ -19,6 +19,33 @@ const DATA = {
 }
 
 
+function fillData(){
+  let info = null;
+  if ( DATA.task != null)
+    info = DATA.task.info;
+
+  if (!info) {
+      info = {
+        "number-order": "-",
+        "steel-grade": "-",
+        "number-melt": "-",
+        "height": "-",
+        "width": "-",
+        "length": "-",
+        "count": "-"
+    }
+  }
+  const table = document.querySelector("table");
+  Object.keys(info).forEach(val => {
+        console.log(val)
+        const td = table.querySelector(`#${val}`);
+        td.innerText = info[val];
+  });
+
+  
+
+}
+
 function drawPage(rectsData){
   svg.innerHTML = "";
   rectsData.forEach((rectData, index) => {
@@ -61,6 +88,8 @@ function drawPage(rectsData){
 
   }
   );
+  fillData();
+  
   if (!DATA.task) return;
   if (CURRENT_STATE_TASK == WAIT_STATE) return;
     if (!document.getElementById("arrow")) {
@@ -68,15 +97,15 @@ function drawPage(rectsData){
       const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
 
       marker.id = "arrow";
-      marker.setAttribute("markerWidth", "6");  // Было 10, уменьшили
-      marker.setAttribute("markerHeight", "6"); // Было 10, уменьшили
-      marker.setAttribute("refX", "5");  // Подстроили под новый размер
-      marker.setAttribute("refY", "3");  // Подстроили под новый размер
+      marker.setAttribute("markerWidth", "6");  
+      marker.setAttribute("markerHeight", "6"); 
+      marker.setAttribute("refX", "5");  
+      marker.setAttribute("refY", "3");  
       marker.setAttribute("orient", "auto");
       marker.setAttribute("markerUnits", "strokeWidth");
 
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute("d", "M 0 0 L 6 3 L 0 6 Z"); // Было (10,5) → стало (6,3)
+      path.setAttribute("d", "M 0 0 L 6 3 L 0 6 Z"); 
       path.setAttribute("fill", "black");
 
       marker.appendChild(path);
@@ -126,6 +155,7 @@ function drawPage(rectsData){
         text.textContent = `${DATA.task.count} штук`;                 // Текст в прямоугольнике
 
         svg.appendChild(text);
+        
 };
 
 
@@ -317,7 +347,7 @@ function checkTask(){
                 DATA.task = task_backend;
                 DATA.sound = null;
 
-                if (DATA.task.state == WAIT_STATE){
+                 if (DATA.task.state == WAIT_STATE){
                     DATA.button.id = "start";
                     DATA.button.innerText = 'Начать задание';
                     CURRENT_STATE_TASK = WAIT_STATE;
@@ -344,11 +374,13 @@ function checkTask(){
             
           }
           drawPage(rectsData);
+
           if (DATA.task)
             DATA.button.disabled = false;
           else
             DATA.button.disabled = true;
-          
+
+          fillData();
         }
       )
 }
