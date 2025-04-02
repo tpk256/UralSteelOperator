@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/static/crane.js"></script>
+  <title>Кран</title>
+
+  <style>
+    html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    }
+    div#panel {
+        width: 100%;
+        height: 20%;
+        background-color: #232323;
+
+    }
+
+    div#map {
+        width: 100%;
+        height: 80%;
+        background-color:   #2e2e2e;
+    }
+    
+    
+    div#info {
+        display: inline;
+        height: 40%;
+        width: 30%;
+        background-color: aqua;
+    }
+
+    #start, #stop {
+        margin-top: 4%;
+        width: 15%;
+        height: 25%;
+        margin-left: 30%;
+        margin-right: 10%;
+        
+    }
+
+    #start {
+        color: black;
+        background-color: green;
+    }
+    #stop {
+        color: black;
+        background-color: red;
+    }
+    audio {
+        visibility: hidden;
+    }
+  </style>
+
+</head>
+<body>
+    <div id="panel">
+        <button id="start" disabled>wait update</button>
+        <button id="sound">wait update</button>
+        <div id="info"></div>
+       
+    </div>
+
+    <div id="map">
+        <svg id="warehouse" width="100%" height="78%" preserveAspectRatio="xMinYMin meet">
+
+        </svg>
+    </div>
+    <script>
+        const svg = document.querySelector("svg#warehouse")
+        offset = 0;
+        height_offset = 50;
+        width_max = svg.clientWidth;
+        height_max = svg.clientHeight;
+
+        width_place = width_max / 7.7;
+        height_place = height_max / 6.8;
+
+        offset_width =  width_place / 7;
+        offset_height = height_place / 5;
+        const rectsData = [
+                  
+                        { id: 1, x: 3 *  width_place + 1 * offset_width,   y: 3 * height_place ,  width: width_place, height: height_place, name: "Склад №1"},
+                        { id: 3, x: 2 * offset_width + 4 *width_place,  y:3 * height_place,  width: width_place, height: height_place, name: "Склад №2" },
+
+                        { id: 2, x: 3 *  width_place + 1 * offset_width,  y: 4 * height_place + offset_height,  width: width_place, height: height_place, name: "Склад №3"} ,
+                        { id: 4, x: 2 * offset_width + 4 *width_place,   y: 4 * height_place + offset_height, width: width_place, height: height_place, name: "Склад №4" },
+
+                        { id: 5, x: 3 *  width_place + 1 * offset_width,  y: 5 * height_place + 2 * offset_height,  width: width_place, height: height_place, name: "Склад №5" }, // +
+                        { id: 6, x: 2 * offset_width + 4 *width_place,  y: 5 * height_place + 2 * offset_height,  width: width_place, height: height_place, name: "Склад №6" }, // +
+
+                        { id: 8, x: offset_width, y: 5 * height_place + 2 * offset_height,  width: width_place, height: height_place, name: "Изолятор брака" }, // +
+                        { id: 9, x: 2 * offset_width + width_place, y: 5 * height_place + 2 * offset_height,  width: width_place , height: height_place, name: "Кантователь" }, // +
+
+                        { id: 7, x: offset_width, y: 4 * height_place + offset_height,  width: width_place, height: height_place, name: "Стенд для зачистки" }, // +
+                        
+                        
+                        { id: 10, x: 5 *  width_place + 3 * offset_width, y: 5 * height_place + 2 * offset_height,  width: width_place, height: height_place, name: "Выход" }, // +
+                        { id: 11, x: 6 *  width_place + 4 * offset_width, y: 5 * height_place + 2 * offset_height,  width: width_place, height: height_place, name: "Вход" }, // +
+
+                        { id: 12, x: 5 *  width_place + 3 * offset_width, y: 4.6 * height_place  ,  width: width_place, height: height_place * 0.6, color: "gray", name: "Шлеппер Выход" },
+                        { id: 13, x: 6 *  width_place + 4 * offset_width, y: 4.6 * height_place , width: width_place, height: height_place * 0.6, color: "gray", name: "Шлеппер Вход"},
+];
+
+        init();
+    
+        document.querySelector("button#sound").addEventListener("click", playSoundTask);
+    </script>
+</body>
+</html>
