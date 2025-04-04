@@ -7,6 +7,17 @@
   <title>Fullscreen</title>
 
   <style>
+    .modal {
+              display: none;
+              position: fixed;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              background: white;
+              padding: 20px;
+              border: 2px solid black;
+          }
+
     html, body {
       margin: 0;
       padding: 0;
@@ -205,7 +216,32 @@ input{
      
 
   </div>
+        <div id="modal" class="modal">
+          <p id="p-id"></p>
+          <p id="p-from"></p>
+          <p id="p-to"></p>
+          <p id="p-count"></p>
+          <p id="p-state"></p>
+          <button onclick="closeModal()">Закрыть</button>
+      </div>
+
     <script>
+      
+      function showModal() {
+          task = modal_tasks.shift();
+          document.querySelector("#p-id").innerText = `Задание: ${task.id}`;
+          document.querySelector("#p-from").innerText = `Откуда: ${rectsNames[task.from]}`;
+          document.querySelector("#p-to").innerText = `Куда: ${rectsNames[task.to]}`;
+          document.querySelector("#p-count").innerText = `Количество: ${task.count}`;
+          document.querySelector("#p-state").innerText = `Статус: Выполнено`;
+          document.getElementById("modal").style.display = "block";
+
+            }
+
+      function closeModal() {
+                document.getElementById("modal").style.display = "none";
+            }
+
 
         const svg = document.getElementById('svg');
         const pointer = {

@@ -1,7 +1,7 @@
 
 SOURCE = null;
 
-
+modal_tasks = [];
 
 WAIT_STATE = 0;
 WORK_STATE = 1;
@@ -18,11 +18,38 @@ const DATA = {
     task: null,
 }
 
+const rectsNames = {
+  1: "Склад №1",
+  2: "Склад №3" ,
+  3: "Склад №2" ,
+  4: "Склад №4" ,
+  5: "Склад №5" ,
+  6: "Склад №6" ,
 
+  7: "Стенд МОР" ,
+  8: "Изолятор брака" ,
+  9: "Кантователь" ,
+
+  10: "Выход" ,
+  11: "Вход" ,
+
+  12: "Шлеппер Выход" ,
+  13: "Шлеппер Вход",
+
+  100: "...",
+  101: "---"
+}
 function fillData(){
   let info = null;
-  if ( DATA.task != null)
+//  const table = document.querySelector("table");
+  const table_task = document.querySelector("#data-task");
+  if ( DATA.task != null){
     info = DATA.task.info;
+    table_task.querySelector('#number-task').innerText = DATA.task.id;
+    table_task.querySelector('#from').innerText = rectsNames[DATA.task.from_];
+    table_task.querySelector('#to').innerText = rectsNames[DATA.task.to];
+    table_task.querySelector('#count-task').innerText = DATA.task.count;
+  }
 
   if (!info) {
       info = {
@@ -34,13 +61,18 @@ function fillData(){
         "length": "-",
         "count": "-"
     }
+
+    table_task.querySelector('#number-task').innerText = '-';
+    table_task.querySelector('#from').innerText = '-';
+    table_task.querySelector('#to').innerText = '-';
+    table_task.querySelector('#count-task').innerText = '-';
   }
-  const table = document.querySelector("table");
-  Object.keys(info).forEach(val => {
-        console.log(val)
-        const td = table.querySelector(`#${val}`);
-        td.innerText = info[val];
-  });
+  
+//  Object.keys(info).forEach(val => {
+//        console.log(val)
+//        const td = table.querySelector(`#${val}`);
+//        td.innerText = info[val];
+//  });
 
   
 
@@ -89,72 +121,79 @@ function drawPage(rectsData){
   }
   );
   fillData();
-  
+  if (!document.getElementById("arrow")) {
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+
+    marker.id = "arrow";
+    marker.setAttribute("markerWidth", "6");  
+    marker.setAttribute("markerHeight", "6"); 
+    marker.setAttribute("refX", "5");  
+    marker.setAttribute("refY", "3");  
+    marker.setAttribute("orient", "auto");
+    marker.setAttribute("markerUnits", "strokeWidth");
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "M 0 0 L 6 3 L 0 6 Z"); 
+    path.setAttribute("fill", "black");
+
+    marker.appendChild(path);
+    defs.appendChild(marker);
+    svg.appendChild(defs);
+  }
   if (!DATA.task) return;
-  if (CURRENT_STATE_TASK == WAIT_STATE) return;
-    if (!document.getElementById("arrow")) {
-      const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-      const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+  const from_ = document.getElementById(`place-${DATA.task.from_}`);
+    const to = document.getElementById(`place-${DATA.task.to}`);
+    from_.setAttribute("fill", "green");
+    to.setAttribute("fill", "red");
+    const x0 = from_.getAttribute("x");
+    const y0 = from_.getAttribute("y");
 
-      marker.id = "arrow";
-      marker.setAttribute("markerWidth", "6");  
-      marker.setAttribute("markerHeight", "6"); 
-      marker.setAttribute("refX", "5");  
-      marker.setAttribute("refY", "3");  
-      marker.setAttribute("orient", "auto");
-      marker.setAttribute("markerUnits", "strokeWidth");
+    const width0 = from_.getAttribute("width");
+    const height0 = from_.getAttribute("height");
 
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute("d", "M 0 0 L 6 3 L 0 6 Z"); 
-      path.setAttribute("fill", "black");
+    const x1 = to.getAttribute("x");
+    const y1 = to.getAttribute("y");
 
-      marker.appendChild(path);
-      defs.appendChild(marker);
-      svg.appendChild(defs);
-    }
+    const width1 = to.getAttribute("width");
+    const height1 = to.getAttribute("height");
+
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.id = `line-${DATA.task.id}`;
+    line.setAttribute("x1", Number(width0 / 2) + Number(x0) );
+    line.setAttribute("y1", Number(y0) + Number(height0 / 2));
+    line.setAttribute("x2", Number(x1) + Number(width1 / 2));
+    line.setAttribute("y2", Number(y1)  + Number(height1 / 2));
+    
+    line.setAttribute("stroke-width", "5");
+    line.setAttribute("marker-end", "url(#arrow)");
+    if (CURRENT_STATE_TASK == WAIT_STATE) 
+      line.setAttribute("stroke", "gray");
+    else
+      line.setAttribute("stroke", "yellow");
+    
+    svg.appendChild(line);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    console.log(line.x1)
+    text.setAttribute('x', (line.x1.baseVal.value + line.x2.baseVal.value) / 2 + 5);
+    text.setAttribute('y', (line.y1.baseVal.value + line.y2.baseVal.value) / 2 + 5);
+    text.setAttribute('text-anchor', 'left');             // Центрировать по горизонтали
+    text.setAttribute('alignment-baseline', 'middle');      // Центрировать по вертикали
+    text.setAttribute('font-size', '17');                    // Размер шрифта, можешь поиграть
+    text.setAttribute("font-weight", "bold")
+    text.setAttribute('fill', 'blue');                      // Цвет шрифта
+    text.textContent = `${DATA.task.count} штук`;                 // Текст в прямоугольнике
+
+    svg.appendChild(text);
+  
+
+    
 
         
 
         
-        const from_ = document.getElementById(`place-${DATA.task.from_}`);
-        const to = document.getElementById(`place-${DATA.task.to}`);
-        from_.setAttribute("fill", "green");
-        to.setAttribute("fill", "red");
-        const x0 = from_.getAttribute("x");
-        const y0 = from_.getAttribute("y");
-
-        const width0 = from_.getAttribute("width");
-        const height0 = from_.getAttribute("height");
-
-        const x1 = to.getAttribute("x");
-        const y1 = to.getAttribute("y");
-
-        const width1 = to.getAttribute("width");
-        const height1 = to.getAttribute("height");
-
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        line.id = `line-${DATA.task.id}`;
-        line.setAttribute("x1", Number(width0 / 2) + Number(x0) );
-        line.setAttribute("y1", Number(y0) + Number(height0 / 2));
-        line.setAttribute("x2", Number(x1) + Number(width1 / 2));
-        line.setAttribute("y2", Number(y1)  + Number(height1 / 2));
-        line.setAttribute("stroke", "yellow");
-        line.setAttribute("stroke-width", "5");
-        line.setAttribute("marker-end", "url(#arrow)");
-        svg.appendChild(line);
-
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        console.log(line.x1)
-        text.setAttribute('x', (line.x1.baseVal.value + line.x2.baseVal.value) / 2 + 5);
-        text.setAttribute('y', (line.y1.baseVal.value + line.y2.baseVal.value) / 2 + 5);
-        text.setAttribute('text-anchor', 'left');             // Центрировать по горизонтали
-        text.setAttribute('alignment-baseline', 'middle');      // Центрировать по вертикали
-        text.setAttribute('font-size', '17');                    // Размер шрифта, можешь поиграть
-        text.setAttribute("font-weight", "bold")
-        text.setAttribute('fill', 'blue');                      // Цвет шрифта
-        text.textContent = `${DATA.task.count} штук`;                 // Текст в прямоугольнике
-
-        svg.appendChild(text);
+        
         
 };
 
@@ -164,6 +203,7 @@ function init(){
     DATA.button = document.querySelector("button#start");
 
     DATA.button.innerText = 'Начать задание';
+    DATA.button.id = "not_task";
     DATA.button.disabled = true
     DATA.button.addEventListener('click', changeStateTask);
     getSoundTask();
@@ -299,6 +339,8 @@ function changeStateTask(){
             FLAG_DOWNLOAD = 0;
             CURRENT_STATE_TASK = WAIT_STATE;
             drawPage(rectsData);
+            DATA.button.innerText = 'Начать задание';
+            DATA.button.id = "not_task";
         }
         else {
             SOURCE = null;
@@ -336,8 +378,8 @@ function checkTask(){
               DATA.task = null;
               DATA.sound = null;
               FLAG_DOWNLOAD = 0;
-              DATA.button.id = "start";
               DATA.button.innerText = 'Начать задание';
+              DATA.button.id = "not_task";
 
           }
           else{

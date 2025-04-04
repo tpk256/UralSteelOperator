@@ -25,64 +25,160 @@
         background-color:   #2e2e2e;
     }
     
-    
+    .tables-container {
+    display: flex;  /* Размещаем таблицы в строку */
+    gap: 20px;  /* Отступ между таблицами */
+    justify-content: center; /* Центрируем таблицы */
+}
+
+.table {
+    width: 300px;
+    border-collapse: collapse;
+    background-color: #f8f9fa;
+}
+
+th, td {
+    border: 2px solid #007bff;
+    padding: 10px;
+    text-align: left;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center; /* Центрируем кнопки */
+    gap: 15px; /* Отступ между кнопками */
+    margin-top: 20px; /* Отступ сверху */
+}
+
+#start {
+        color: black;
+        background-color: green;
+    }
+#stop {
+    color: black;
+    background-color: red;
+}
+
+button#stop:hover, button#start:hover {
+   
+    transform: scale(1.05); /* Легкое увеличение */
+}
+#not_task {
+    background-color: gray;
+}
+
+/* button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0056b3;
+} */
 
 
-    #start, #stop {
-        margin-top: 4%;
+
+    /* #start, #stop {
+        margin-top: 1%;
         width: 15%;
         height: 25%;
         margin-left: 20%;
         margin-right: 10%;
         
-    }
-
-    #start {
-        color: black;
-        background-color: green;
-    }
-    #stop {
-        color: black;
-        background-color: red;
-    }
+    } */
+/* 
+    
     #sound {
 
-        margin-right: 5%;
+        margin-left: 5%;
     }
 
       table {
       display: inline-block;
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #f8f9fa;
       }
+
+
+
+        th, td {
+            border: 2px solid #007bff; 
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        } */
+
   </style>
 
 </head>
 <body>
-    <div id="panel">
-        <button id="start" disabled>wait update</button>
-        <button id="sound">Прослушать задание</button>
-        <table>
+    <div id="panel" class="tables-container">
+        
+<!--        <table class="table first-table">-->
+<!--            <thead>-->
+<!--                <th>-->
+<!--                    № заказа-->
+<!--                </th>-->
+
+<!--                <th>-->
+<!--                    Марка стали-->
+<!--                </th>-->
+
+<!--                <th>-->
+<!--                    № плавки-->
+<!--                </th>-->
+
+<!--                <th>-->
+<!--                    Толщина-->
+<!--                </th>-->
+
+<!--                <th>-->
+<!--                    Ширина-->
+<!--                </th>-->
+<!--                <th>-->
+<!--                    Длина-->
+<!--                </th>-->
+
+<!--                <th>-->
+<!--                    Количество-->
+<!--                </th>-->
+<!--            </thead>-->
+<!--            <tbody>-->
+<!--                <tr>-->
+<!--                    <td id="number-order">-</td>-->
+<!--                    <td id="steel-grade">-</td>-->
+<!--                    <td id="number-melt">-</td>-->
+<!--                    <td id="height">-</td>-->
+<!--                    <td id="width">-</td>-->
+<!--                    <td id="length">-</td>-->
+<!--                    <td id="count">-</td>-->
+<!--                </tr>-->
+<!--            </tbody>-->
+
+<!--        </table>-->
+     
+        
+        <table class="table second-table" id="data-task">
             <thead>
                 <th>
-                    Номер заказа
+                    № Задания
                 </th>
 
                 <th>
-                    Марка стали
+                    Откуда
                 </th>
 
                 <th>
-                    Номер плавки
-                </th>
-
-                <th>
-                    Толщина
-                </th>
-
-                <th>
-                    Ширина
-                </th>
-                <th>
-                    Длина
+                    Куда
                 </th>
 
                 <th>
@@ -91,19 +187,19 @@
             </thead>
             <tbody>
                 <tr>
-                    <td id="number-order">-</td>
-                    <td id="steel-grade">-</td>
-                    <td id="number-melt">-</td>
-                    <td id="height">-</td>
-                    <td id="width">-</td>
-                    <td id="length">-</td>
-                    <td id="count">-</td>
+                    <td id="number-task">-</td>
+                    <td id="from">-</td>
+                    <td id="to">-</td>
+                    <td id="count-task">-</td>
                 </tr>
             </tbody>
 
         </table>
 
-       
+        <div class="button-container">
+            <button id="start" disabled>wait update</button>
+            <button id="sound">Прослушать задание</button>
+        </div>
     </div>
 
     <div id="map">
@@ -119,32 +215,37 @@
         height_max = svg.clientHeight;
 
         width_place = width_max / 7.7;
-        height_place = height_max / 6.8;
+        height_place = height_max / 4.1;
 
         offset_width =  width_place / 7;
-        offset_height = height_place / 5;
+        offset_height = height_place / 6;
+        
+
+        move_y = - offset_height * 13;
+
+        
         const rectsData = [
                   
-                        { id: 1, x: 3 *  width_place + 1 * offset_width,   y: 3 * height_place ,  width: width_place, height: height_place, name: "Склад №1"},
-                        { id: 3, x: 2 * offset_width + 4 *width_place,  y:3 * height_place,  width: width_place, height: height_place, name: "Склад №2" },
+                        { id: 1, x: 3 *  width_place + 1 * offset_width,   y: 3 * height_place + move_y,  width: width_place, height: height_place, name: "Склад №1"},
+                        { id: 3, x: 2 * offset_width + 4 *width_place,  y:3 * height_place + move_y,  width: width_place, height: height_place, name: "Склад №2" },
 
-                        { id: 2, x: 3 *  width_place + 1 * offset_width,  y: 4 * height_place + offset_height,  width: width_place, height: height_place, name: "Склад №3"} ,
-                        { id: 4, x: 2 * offset_width + 4 *width_place,   y: 4 * height_place + offset_height, width: width_place, height: height_place, name: "Склад №4" },
+                        { id: 2, x: 3 *  width_place + 1 * offset_width,  y: 4 * height_place + offset_height + move_y,  width: width_place, height: height_place, name: "Склад №3"} ,
+                        { id: 4, x: 2 * offset_width + 4 *width_place,   y: 4 * height_place + offset_height + move_y, width: width_place, height: height_place, name: "Склад №4" },
 
-                        { id: 5, x: 3 *  width_place + 1 * offset_width,  y: 5 * height_place + 2 * offset_height,  width: width_place, height: height_place, name: "Склад №5" }, // +
-                        { id: 6, x: 2 * offset_width + 4 *width_place,  y: 5 * height_place + 2 * offset_height,  width: width_place, height: height_place, name: "Склад №6" }, // +
+                        { id: 5, x: 3 *  width_place + 1 * offset_width,  y: 5 * height_place + 2 * offset_height + move_y,  width: width_place, height: height_place, name: "Склад №5" }, // +
+                        { id: 6, x: 2 * offset_width + 4 *width_place,  y: 5 * height_place + 2 * offset_height + move_y,  width: width_place, height: height_place, name: "Склад №6" }, // +
 
-                        { id: 8, x: offset_width, y: 5 * height_place + 2 * offset_height,  width: width_place, height: height_place, name: "Изолятор брака" }, // +
-                        { id: 9, x: 2 * offset_width + width_place, y: 5 * height_place + 2 * offset_height,  width: width_place , height: height_place, name: "Кантователь" }, // +
+                        { id: 8, x: offset_width, y: 5 * height_place + 2 * offset_height + move_y,  width: width_place, height: height_place, name: "Изолятор брака" }, // +
+                        { id: 9, x: 2 * offset_width + width_place, y: 5 * height_place + 2 * offset_height + move_y,  width: width_place , height: height_place, name: "Кантователь" }, // +
 
-                        { id: 7, x: offset_width, y: 4 * height_place + offset_height,  width: width_place, height: height_place, name: "Стенд для зачистки" }, // +
+                        { id: 7, x: offset_width, y: 4 * height_place + offset_height + move_y,  width: width_place, height: height_place, name: "Стенд для зачистки" }, // +
                         
                         
-                        { id: 10, x: 5 *  width_place + 3 * offset_width, y: 5 * height_place + 2 * offset_height,  width: width_place, height: height_place, name: "Выход" }, // +
-                        { id: 11, x: 6 *  width_place + 4 * offset_width, y: 5 * height_place + 2 * offset_height,  width: width_place, height: height_place, name: "Вход" }, // +
+                        { id: 10, x: 5 *  width_place + 3 * offset_width, y: 5 * height_place + 2 * offset_height + move_y,  width: width_place, height: height_place, name: "Выход" }, // +
+                        { id: 11, x: 6 *  width_place + 4 * offset_width, y: 5 * height_place + 2 * offset_height + move_y,  width: width_place, height: height_place, name: "Вход" }, // +
 
-                        { id: 12, x: 5 *  width_place + 3 * offset_width, y: 4.6 * height_place  ,  width: width_place, height: height_place * 0.6, color: "gray", name: "Шлеппер Выход" },
-                        { id: 13, x: 6 *  width_place + 4 * offset_width, y: 4.6 * height_place , width: width_place, height: height_place * 0.6, color: "gray", name: "Шлеппер Вход"},
+                        { id: 12, x: 5 *  width_place + 3 * offset_width, y: 4.6 * height_place + move_y ,  width: width_place, height: height_place * 0.6, color: "gray", name: "Шлеппер Выход" },
+                        { id: 13, x: 6 *  width_place + 4 * offset_width, y: 4.6 * height_place + move_y, width: width_place, height: height_place * 0.6, color: "gray", name: "Шлеппер Вход"},
 ];
 
         init();

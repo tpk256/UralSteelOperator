@@ -1,7 +1,7 @@
 ID_TASKS_FOR_TEST = 0;
 
 
-
+modal_tasks = [];
 tasks = {};
 for (let i = 0; i < 5; i++){
   tasks[i] = {
@@ -188,6 +188,7 @@ function drawPage(rectsData){
                                   order_task_id.push(-1);
 
                               console.log(order_task_id);
+                              console.log("SEND ORDER SEND ORDER SEND ORDER SEND ORDER SEND ORDER");
                               fetch("/task/order",
                                 {
                                   method: "PUT",
@@ -597,11 +598,30 @@ function CheckTasksState(){
           }).then( data => {
                     let task_active = [];
                     let flag_changes = false;
+
+                    if (tasks[0].task && tasks[0].task.id != -1){
+
+
+                        // && (tasks[0].task.state == states_task_work.IN_PROGRESS)
+                        if (data.count == 0 || (data.tasks[0].id != tasks[0].task.id)){
+                            //setTimeout(async () => window.parent.SendMoved(tasks[0].task.from, tasks[0].task.to, tasks[0].task.count), 100);
+                            modal_tasks.push(tasks[0].task);
+                            if (document.getElementById("modal").style.display != "block")
+                                showModal();
+                      
+
+                        }
+
+                    }
+                   if (modal_tasks.length != 0 && document.getElementById("modal").style.display != "block")
+                          showModal();
+
                     for( let i = 0; i < 5; i++){
                       for (let j = 0; j < data.count; j++){
                           info_task = data.tasks[j];
                           if (tasks[i].task && (tasks[i].task.id == info_task.id)){
                               task_active.push(tasks[i].task.id);
+
                               console.log(`СОСТОЯНИЕ СЕЙЧАС ${tasks[i].task.state}`);
                               if (tasks[i].task.state != info_task.state)
                                 flag_changes = true;
