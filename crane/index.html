@@ -7,6 +7,35 @@
   <title>Кран</title>
 
   <style>
+
+
+
+      thead.p-bold p{
+        font-size: 20px;
+      }
+      .modal {
+              display: none;
+              position: fixed;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              background: white;
+              padding: 20px;
+              border: 2px solid black;
+          }
+
+    .close-btn {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        background: transparent;
+        background-color: red;
+        border: none;
+        font-size: 30px;
+        cursor: pointer;
+        color: black;
+}
+
     html, body {
     height: 100%;
     margin: 0;
@@ -199,6 +228,7 @@ button:hover {
         <div class="button-container">
             <button id="start" disabled>wait update</button>
             <button id="sound">Прослушать задание</button>
+            <button id="btn-info" onclick="showModal()">По листам</button>
         </div>
     </div>
 
@@ -206,6 +236,58 @@ button:hover {
         <svg id="warehouse" width="100%" height="78%" preserveAspectRatio="xMinYMin meet">
 
         </svg>
+    </div>
+
+    <div id="modal" class="modal">
+          <table class="table second-table" id="order-info">
+            <thead class="p-bold">
+                <th>
+                    <p>Заказ</p>
+
+                </th>
+
+                <th>
+                    <p>Марка стали</p>
+
+                </th>
+
+                <th>
+                    <p>Плавка </p>
+
+                </th>
+
+                <th>
+                    <p> Толщина</p>
+
+                </th>
+
+                <th>
+                    <p> Ширина</p>
+
+                </th>
+
+                <th>
+                    <p> Длина</p>
+
+                </th>
+                <th>
+                    <p> Количество</p>
+                </th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="modal-order"><p>-</p></td>
+                    <td id="modal-steel-grade"><p>-</p></td>
+                    <td id="modal-melt"><p>-</p></td>
+                    <td id="modal-height"><p>-</p></td>
+                    <td id="modal-width"><p>-</p></td>
+                    <td id="modal-length"><p>-</p></td>
+                    <td id="modal-count"><p>-</p></td>
+                </tr>
+            </tbody>
+
+        </table>
+          <button class="close-btn" onclick="closeModal()">x</button>
     </div>
     <script>
         const svg = document.querySelector("svg#warehouse")
@@ -216,6 +298,7 @@ button:hover {
 
         width_place = width_max / 7.7;
         height_place = height_max / 4.1;
+        font_size_place = width_place / 9;
 
         offset_width =  width_place / 7;
         offset_height = height_place / 6;
@@ -226,31 +309,32 @@ button:hover {
         
         const rectsData = [
                   
-                        { id: 1, x: 3 *  width_place + 1 * offset_width,   y: 3 * height_place + move_y,  width: width_place, height: height_place, name: "Склад №1"},
-                        { id: 3, x: 2 * offset_width + 4 *width_place,  y:3 * height_place + move_y,  width: width_place, height: height_place, name: "Склад №2" },
+                        { id: 6, x: 3 *  width_place + 1 * offset_width,   y: 3 * height_place + move_y,  width: width_place, height: height_place, name: "Склад №6"},
+                        { id: 5, x: 2 * offset_width + 4 *width_place,  y:3 * height_place + move_y,  width: width_place, height: height_place, name:  "Склад №5"},
 
-                        { id: 2, x: 3 *  width_place + 1 * offset_width,  y: 4 * height_place + offset_height + move_y,  width: width_place, height: height_place, name: "Склад №3"} ,
-                        { id: 4, x: 2 * offset_width + 4 *width_place,   y: 4 * height_place + offset_height + move_y, width: width_place, height: height_place, name: "Склад №4" },
+                        { id: 4, x: 3 *  width_place + 1 * offset_width,  y: 4 * height_place + offset_height + move_y,  width: width_place, height: height_place, name: "Склад №4"} ,
+                        { id: 3, x: 2 * offset_width + 4 *width_place,   y: 4 * height_place + offset_height + move_y, width: width_place, height: height_place, name:  "Склад №3"},
 
-                        { id: 5, x: 3 *  width_place + 1 * offset_width,  y: 5 * height_place + 2 * offset_height + move_y,  width: width_place, height: height_place, name: "Склад №5" }, // +
-                        { id: 6, x: 2 * offset_width + 4 *width_place,  y: 5 * height_place + 2 * offset_height + move_y,  width: width_place, height: height_place, name: "Склад №6" }, // +
+                        { id: 2, x: 3 *  width_place + 1 * offset_width,  y: 5 * height_place + 2 * offset_height + move_y,  width: width_place, height: height_place, name:  "Склад №2"}, // +
+                        { id: 1, x: 2 * offset_width + 4 *width_place,  y: 5 * height_place + 2 * offset_height + move_y,  width: width_place, height: height_place, name: "Склад №1" }, // +
 
                         { id: 8, x: offset_width, y: 5 * height_place + 2 * offset_height + move_y,  width: width_place, height: height_place, name: "Изолятор брака" }, // +
-                        { id: 9, x: 2 * offset_width + width_place, y: 5 * height_place + 2 * offset_height + move_y,  width: width_place , height: height_place, name: "Кантователь" }, // +
+                        { id: 11, x: 2 * offset_width + width_place, y: 5 * height_place + 2 * offset_height + move_y,  width: width_place , height: height_place, name: "Кантователь" }, // +
 
                         { id: 7, x: offset_width, y: 4 * height_place + offset_height + move_y,  width: width_place, height: height_place, name: "Стенд для зачистки" }, // +
                         
                         
                         { id: 10, x: 5 *  width_place + 3 * offset_width, y: 5 * height_place + 2 * offset_height + move_y,  width: width_place, height: height_place, name: "Выход" }, // +
-                        { id: 11, x: 6 *  width_place + 4 * offset_width, y: 5 * height_place + 2 * offset_height + move_y,  width: width_place, height: height_place, name: "Вход" }, // +
+                        { id: 9, x: 6 *  width_place + 4 * offset_width, y: 5 * height_place + 2 * offset_height + move_y,  width: width_place, height: height_place, name: "Вход" }, // +
 
                         { id: 12, x: 5 *  width_place + 3 * offset_width, y: 4.6 * height_place + move_y ,  width: width_place, height: height_place * 0.6, color: "gray", name: "Шлеппер Выход" },
                         { id: 13, x: 6 *  width_place + 4 * offset_width, y: 4.6 * height_place + move_y, width: width_place, height: height_place * 0.6, color: "gray", name: "Шлеппер Вход"},
 ];
 
         init();
-    
         document.querySelector("button#sound").addEventListener("click", playSoundTask);
+       
+        
     </script>
 </body>
 </html>

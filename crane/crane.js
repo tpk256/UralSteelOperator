@@ -20,24 +20,66 @@ const DATA = {
 
 const rectsNames = {
   1: "Склад №1",
-  2: "Склад №3" ,
-  3: "Склад №2" ,
+  3: "Склад №3" ,
+  2: "Склад №2" ,
   4: "Склад №4" ,
   5: "Склад №5" ,
   6: "Склад №6" ,
 
   7: "Стенд МОР" ,
   8: "Изолятор брака" ,
-  9: "Кантователь" ,
+  11: "Кантователь" ,
 
   10: "Выход" ,
-  11: "Вход" ,
+  9: "Вход" ,
 
   12: "Шлеппер Выход" ,
   13: "Шлеппер Вход",
 
   100: "...",
   101: "---"
+}
+
+function showModal() {
+  refreshDataModal();
+  document.getElementById("modal").style.display = "block";
+}
+
+function closeModal() {
+      document.getElementById("modal").style.display = "none";
+  }
+
+function refreshDataModal(){
+        let task = DATA.task;
+        let info = null;
+        if (task)
+          info = task.info;
+
+
+        if (!info){
+          document.querySelector("#modal-order p").innerText = `-`;
+          document.querySelector("#modal-steel-grade p").innerText = `-`;
+
+          document.querySelector("#modal-melt p").innerText = `-`;
+          
+          document.querySelector("#modal-height p").innerText = `-`;
+          document.querySelector("#modal-width p").innerText = `-`;
+          document.querySelector("#modal-length p").innerText = `-`;
+          document.querySelector("#modal-count p").innerText = `-`;
+        }
+      
+      else{
+        document.querySelector("#modal-order p").innerText = `${info.order_number}`;
+        document.querySelector("#modal-steel-grade p").innerText = `${info.steel_grade}`;
+        document.querySelector("#modal-melt p").innerText = `${info.melt_number}`;
+        
+        document.querySelector("#modal-height p").innerText = `${info.thickness}`;
+        document.querySelector("#modal-width p").innerText = `${info.width_l}`;
+        document.querySelector("#modal-length p").innerText = `${info.length_l}`;
+        document.querySelector("#modal-count p").innerText = `${info.count}`;
+
+        }
+
 }
 function fillData(){
   let info = null;
@@ -111,7 +153,7 @@ function drawPage(rectsData){
         text.setAttribute('y', centerY);
         text.setAttribute('text-anchor', 'middle');             // Центрировать по горизонтали
         text.setAttribute('alignment-baseline', 'middle');      // Центрировать по вертикали
-        text.setAttribute('font-size', '17');                    // Размер шрифта, можешь поиграть
+        text.setAttribute('font-size', font_size_place);                    // Размер шрифта, можешь поиграть
         text.setAttribute("font-weight", "bold")
         text.setAttribute('fill', '#333');                      // Цвет шрифта
         text.textContent = `${rectData.name}`;                 // Текст в прямоугольнике
@@ -361,6 +403,19 @@ function changeStateTask(){
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 function checkTask(){
     fetch(
         `/task/?count=1&info=1`,
@@ -423,6 +478,7 @@ function checkTask(){
             DATA.button.disabled = true;
 
           fillData();
+          refreshDataModal();
         }
       )
 }

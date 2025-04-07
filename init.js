@@ -86,9 +86,43 @@ function drawPage(rectsData){
                 break;
 
               case states_task_create.FIRST_POS_STATE:
-
+                
+                // for (let i = 0; i < 5; i++){
+                //   if (tasks[i].task && tasks[i].task.id != -1){     // Типа чтобы не ломалось всё если создать второй таск с тем же from
+                //     if (tasks[i].task.from == rect.id) return;
+                //   }
+              
+                // }
                 if (cant_be_first_pos.includes(rect.id))
                   return;
+
+
+                let xhr = new XMLHttpRequest();
+                let offset = 0;
+
+                // могут быть баги
+                
+                CheckTasksState();
+                for (let i = 0; i < 5; i++){
+                  if (tasks[i].task && tasks[i].task.from == rect.id && tasks[i].task.id != -1){
+                    offset += tasks[i].task.count;
+                  }
+                }
+
+                xhr.open('GET', `/place/${rect.id}?offset=${offset}`, false);
+                
+                xhr.send();
+                data = JSON.parse(xhr.response);
+                
+                console.log(data)
+                console.log(data)
+                console.log(typeof(data))
+                if (data.count == 0){
+                  alert("На этой позиции нет листов");
+                  return;
+                }
+                    
+
                 TEMP_DATA.from = rect.id;
                 rect.setAttribute('fill', "green");
                 CURRENT_STATE = states_task_create.SECOND_POS_STATE;
@@ -96,33 +130,16 @@ function drawPage(rectsData){
 
                 if (rect_from_one_list.includes(TEMP_DATA.from)){
                     TEMP_DATA.count = 1;
-                    TEMP_DATA.limit = true;
+                    TEMP_DATA.limit = 1;
                 }
                 else{
-                    fetch(
-                      `/place/${TEMP_DATA.from}`,
-                      {
-                        method: 'GET',
-                      }
-                    ).then(response => {
-                      if (!response.ok) {
-                        return {count: 1}
-                      }
-                      return response.json();
-                    }).then(
-                      data => {
-                        console.log("sdasd");
-                        const count_field = tasks[TEMP_DATA.rowId].row.querySelector("input");
-                        TEMP_DATA.count = data.count;
-                        count_field.setAttribute("value", data.count);
-                        count_field.setAttribute("max", data.count);
-                      }
-                    )
+                    const count_field = tasks[TEMP_DATA.rowId].row.querySelector("input");
+                    TEMP_DATA.count = data.count;
+                    TEMP_DATA.limit = data.count;
+                    count_field.setAttribute("value", data.count);
+                    count_field.setAttribute("max", data.count);
                 }
 
-
-                
-        
                 console.log(` количество !!${TEMP_DATA.count}`)
                 normalizeTasks();
                 break;
@@ -242,7 +259,7 @@ function drawPage(rectsData){
                     else {
                       tasks[TEMP_DATA.rowId].task = null;
                       TEMP_DATA = null;
-                      //TODO уведомить что таск не создался +-
+                      alert("Задание не создалось");
                       
                     }
                     setTimeout( ()=> {drawPage(rectsData, grayZone);}, 1000)
@@ -368,7 +385,7 @@ function normalizeTasks(){
     if (task.id == -1){
       //Таск только создается;
       temp_html += `
-      <td><input type="number" id="quantity-${i}" name="quantity" min="1" max="1000" step="1" value="${task.count}" ${disabled_count_field? "disabled": ""}></td>
+      <td><input type="number" id="quantity-${i}" name="quantity" min="1" max="${task.limit? task.limit: 1000}" step="1" value="${task.count}" ${disabled_count_field? "disabled": ""}></td>
       <td>Не создано</td>
       <td>
         <button class="color" id ="cancel-${i}">
@@ -605,9 +622,28 @@ function CheckTasksState(){
                         // && (tasks[0].task.state == states_task_work.IN_PROGRESS)
                         if (data.count == 0 || (data.tasks[0].id != tasks[0].task.id)){
                             //setTimeout(async () => window.parent.SendMoved(tasks[0].task.from, tasks[0].task.to, tasks[0].task.count), 100);
-                            modal_tasks.push(tasks[0].task);
-                            if (document.getElementById("modal").style.display != "block")
-                                showModal();
+
+                            
+                            fetch(`/task/${tasks[0].task.id}`,
+                            {
+                              method: "GET",
+                            }
+                
+                                  ).then(response => {
+                                    if (!response.ok) {
+                                      throw new Error();
+                                    }
+                                    return response.json();
+                                  }).then( data => {
+
+                                      if (data.id != 0 && data.state == -100){
+                                        data.from = data.from_;
+                                        modal_tasks.push(data);
+                                      }
+                                      
+
+                                  })
+                            
                       
 
                         }
